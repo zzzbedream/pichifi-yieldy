@@ -1,0 +1,15 @@
+{
+  "chainId": 46630,
+  "intent": {
+    "vault": "0x00000000000000000000000000000000000000aa",
+    "nonce": "7",
+    "deadline": "1790000000",
+    "regime": 1,
+    "morphoBps": 6000,
+    "uniswapBps": 3000,
+    "volBps": 4250,
+    "inputsHash": "0xd41d6b189e130a016c166c65c226d7fa1a53be2afafef394b142a39dc9c054cd",
+    "modelVersion": "0x7f304cf4b47f3d73de8809d9c0f1341c1e77925a6f4529baff9d00c488dd9466"
+  },
+  "digest": "0xd8306408ae0c4fe397308536e70fa1143bf34f6f92586b3d0dab9f908a980132"
+}

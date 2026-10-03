@@ -1,0 +1,36 @@
+{
+  "name": "@ayv/agent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Agentic Yield Vaults off-chain brain: deterministic policy, Amadeus BLS signer, relayer, indexer and API",
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "start": "tsx src/main.ts",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit",
+    "bls:vectors": "tsx scripts/bls-vectors.ts",
+    "keys:new": "tsx scripts/new-keys.ts"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@amadeus-protocol/sdk": "1.3.0",
+    "@fastify/cors": "^11.3.0",
+    "@noble/curves": "^1.9.7",
+    "@noble/hashes": "^1.8.0",
+    "dotenv": "^18.0.5",
+    "fastify": "^5.12.5",
+    "viem": "^2.57.2",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.4",
+    "@vitest/coverage-v8": "^5.0.3",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.3"
+  }
+}

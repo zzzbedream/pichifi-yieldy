@@ -1,0 +1,8 @@
+v4-core/=lib/v4-core/src/
+v4-core-test/=lib/v4-core/test/
+@uniswap/v4-core/=lib/v4-core/
+v4-periphery/=lib/v4-periphery/
+morpho-blue/=lib/morpho-blue/src/
+@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/
+forge-std/=lib/v4-core/lib/forge-std/src/
+solmate/=lib/v4-core/lib/solmate/

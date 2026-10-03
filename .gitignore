@@ -1,0 +1,42 @@
+# --- Internal application docs (never commit) ---
+postulacion/
+
+# --- Secrets ---
+.env
+.env.*
+!.env.example
+keys/
+*.key
+*.pem
+*.keystore
+
+# --- Rust / Stylus ---
+**/target/
+**/*.wasm
+**/abi-out/
+
+# --- Foundry ---
+contracts/evm/out/
+contracts/evm/cache/
+contracts/evm/broadcast/
+
+# --- Node / Next.js ---
+node_modules/
+.next/
+out/
+dist/
+coverage/
+.vercel
+*.tsbuildinfo
+.turbo/
+
+# --- Agent runtime data ---
+agent/data/
+
+# --- OS / editors ---
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.log

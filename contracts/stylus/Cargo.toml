@@ -1,0 +1,22 @@
+[workspace]
+resolver = "2"
+members = ["fee-engine", "ecdsa-verifier", "bls-verifier", "vault"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/agentic-yield-vaults/agentic-yield-vaults"
+
+[workspace.dependencies]
+alloy-primitives = { version = "1.5.7", default-features = false }
+alloy-sol-types = { version = "1.5.7", default-features = false }
+stylus-sdk = "=0.10.10"
+
+[profile.release]
+codegen-units = 1
+strip = true
+lto = true
+panic = "abort"
+# "z" keeps the compressed WASM well under the 24KB fragment size.
+opt-level = "z"
