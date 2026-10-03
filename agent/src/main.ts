@@ -1,4 +1,5 @@
-import 'dotenv/config';
+import { resolve } from 'node:path';
+import { config as loadEnv } from 'dotenv';
 import { loadConfig } from './config.js';
 import { logger } from './log.js';
 import { createBlsSigner, createEcdsaSigner, type IntentSigner } from './signing/signer.js';
@@ -8,6 +9,9 @@ import { DecisionStore } from './store/decisions.js';
 import { AgentEngine } from './engine/engine.js';
 import { buildServer } from './api/server.js';
 import { watchVaultFlows } from './indexer/depositWatcher.js';
+
+// Repo-root .env; variables already set in the process environment take precedence.
+loadEnv({ path: resolve(import.meta.dirname, '../../.env'), quiet: true });
 
 async function main(): Promise<void> {
   const config = loadConfig();

@@ -123,7 +123,17 @@ export class AgentEngine {
     if (onChain !== digest) throw new Error(`EIP-712 digest mismatch: local ${digest} vs vault ${onChain}`);
 
     const signed = await signer.sign(digest);
+    const preflight = await vault.preflight(intent, signed.signature);
+    if (!preflight.ok && preflight.retryable) {
+      log.info({ error: preflight.errorName }, 'vault not ready for this intent yet; retrying');
+      this.scheduleRetry(5);
+      return;
+    }
     let record = store.upsert(this.baseRecord(reason, decision, intent, digest, signed.proof));
+    if (!preflight.ok) {
+      store.upsert({ ...record, status: 'failed', error: `${preflight.errorName}: ${preflight.message}` });
+      return;
+    }
     log.info({ nonce: intent.nonce.toString(), regime: decision.regime }, 'intent signed; relaying');
 
     try {

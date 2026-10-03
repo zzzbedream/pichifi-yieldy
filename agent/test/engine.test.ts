@@ -42,6 +42,10 @@ function fakeVault(snap: VaultSnapshot, relayResult: 'success' | 'reverted' | Er
     async onChainDigest(i: Parameters<VaultClient['onChainDigest']>[0]) {
       return intentDigest(46630, i);
     },
+    async preflight() {
+      if (relayResult instanceof Error) return { ok: false as const, errorName: 'NavLossExceeded', message: relayResult.message, retryable: false };
+      return { ok: true as const };
+    },
     async relay() {
       v.relayed += 1;
       if (relayResult instanceof Error) throw relayResult;
@@ -107,12 +111,33 @@ describe('AgentEngine', () => {
     expect(engine.currentScenario()).toBe('recession');
   });
 
-  it('records failures without crashing', async () => {
+  it('records non-retryable preflight failures without relaying', async () => {
     const vault = fakeVault(snapshot(), new Error('execution reverted: NavLossExceeded'));
     const { engine, store } = engineWith(vault);
     await engine.trigger('manual');
     expect(store.latest()!.status).toBe('failed');
     expect(store.latest()!.error).toContain('NavLossExceeded');
+    expect(vault.relayed).toBe(0);
+  });
+
+  it('retries quietly when the vault rate-limits the intent', async () => {
+    vi.useFakeTimers();
+    const vault = {
+      ...fakeVault(snapshot()),
+      preflight: async () => ({ ok: false as const, errorName: 'RebalanceTooSoon', message: 'too soon', retryable: true }),
+    };
+    const { engine, store } = engineWith(vault);
+    await engine.trigger('manual');
+    expect(store.list()).toHaveLength(0);
+    vi.useRealTimers();
+  });
+
+  it('records relay errors that happen after a successful preflight', async () => {
+    const vault = { ...fakeVault(snapshot()), relay: async () => { throw new Error('nonce too low'); } };
+    const { engine, store } = engineWith(vault);
+    await engine.trigger('manual');
+    expect(store.latest()!.status).toBe('failed');
+    expect(store.latest()!.error).toContain('nonce too low');
   });
 
   it('does nothing when the vault already matches the decision', async () => {
