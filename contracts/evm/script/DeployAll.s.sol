@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.26;
+pragma solidity 0.8.26;
 
 import {Script, console2} from "forge-std/Script.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IPoolManager} from "v4-core/interfaces/IPoolManager.sol";
+import {PoolManager} from "v4-core/PoolManager.sol";
 import {IHooks} from "v4-core/interfaces/IHooks.sol";
 import {Hooks} from "v4-core/libraries/Hooks.sol";
 import {LPFeeLibrary} from "v4-core/libraries/LPFeeLibrary.sol";
@@ -35,7 +36,15 @@ import {EcdsaVerifierSol} from "../src/solidity-build/EcdsaVerifierSol.sol";
 ///   forge script script/DeployAll.s.sol --rpc-url $RPC_URL --broadcast --slow
 ///
 /// Env: DEPLOYER_PRIVATE_KEY, GUARDIAN_ADDRESS, POOL_MANAGER (default: Robinhood v4),
-///      USDG_ADDRESS (optional; a labelled mock is deployed when empty), NETWORK_NAME.
+///      USDG_ADDRESS (optional; a labelled mock is deployed when empty), NETWORK_NAME,
+///      DEPLOY_POOL_MANAGER=true (chains without v4, e.g. a Nitro devnode).
+///
+/// DEPLOY_PHASE selects the flow:
+///   all   (default) Solidity build end to end.
+///   infra tokens, oracle, Morpho market (+ PoolManager) -> deployments/<network>.json.
+///         Then deploy the Rust contracts with `cargo stylus deploy` (scripts/stylus-devnode.sh).
+///   pool  reads the infra file + EXT_FEE_ENGINE / EXT_VAULT / EXT_VERIFIER (the Stylus
+///         addresses), deploys hook + pool + adapter and wires them to the Stylus vault.
 contract DeployAll is Script {
     address internal constant ROBINHOOD_POOL_MANAGER = 0x8366a39CC670B4001A1121B8F6A443A643e40951;
     uint256 internal constant PRICE_E8 = 180e8;
@@ -73,15 +82,54 @@ contract DeployAll is Script {
         identity = vm.readFile("../../deployments/agent-identity.json");
         d.poolManager = vm.envOr("POOL_MANAGER", ROBINHOOD_POOL_MANAGER);
 
+        bytes32 phase = keccak256(bytes(vm.envOr("DEPLOY_PHASE", string("all"))));
         vm.startBroadcast(pk);
-        _deployTokens();
-        _deployMorpho();
-        _deployFeeEngineAndHook();
-        _deployPool();
-        _deployVault();
+        if (phase == keccak256("all")) {
+            _maybeDeployPoolManager();
+            _deployTokens();
+            _deployMorpho();
+            d.feeEngine = address(new FeeEngineSol(deployer, 3_000, 50_000, 2));
+            _deployHook();
+            _deployPool();
+            _deployVault();
+        } else if (phase == keccak256("infra")) {
+            _maybeDeployPoolManager();
+            _deployTokens();
+            _deployMorpho();
+        } else if (phase == keccak256("pool")) {
+            _loadInfra();
+            d.feeEngine = vm.envAddress("EXT_FEE_ENGINE");
+            d.vault = vm.envAddress("EXT_VAULT");
+            d.blsVerifier = vm.envOr("EXT_VERIFIER", address(0));
+            _deployHook();
+            _deployPool();
+            _deployAdapterAndWire();
+        } else {
+            revert("DEPLOY_PHASE must be all | infra | pool");
+        }
         vm.stopBroadcast();
 
         _write();
+    }
+
+    function _networkFile() internal view returns (string memory) {
+        return string.concat("../../deployments/", vm.envOr("NETWORK_NAME", string("robinhood-testnet")), ".json");
+    }
+
+    function _maybeDeployPoolManager() internal {
+        if (vm.envOr("DEPLOY_POOL_MANAGER", false)) d.poolManager = address(new PoolManager(deployer));
+    }
+
+    /// @dev Reads the addresses written by the `infra` phase.
+    function _loadInfra() internal {
+        string memory json = vm.readFile(_networkFile());
+        d.usdg = vm.parseJsonAddress(json, ".usdg");
+        d.stock = vm.parseJsonAddress(json, ".stockToken");
+        d.oracle = vm.parseJsonAddress(json, ".oracle");
+        d.morpho = vm.parseJsonAddress(json, ".morpho");
+        d.irm = vm.parseJsonAddress(json, ".irm");
+        d.marketId = vm.parseJsonBytes32(json, ".marketId");
+        d.poolManager = vm.parseJsonAddress(json, ".poolManager");
     }
 
     function _deployTokens() internal {
@@ -113,8 +161,7 @@ contract DeployAll is Script {
         morpho.borrow(params, 1_500_000e6, 0, deployer, deployer);
     }
 
-    function _deployFeeEngineAndHook() internal {
-        d.feeEngine = address(new FeeEngineSol(deployer, 3_000, 50_000, 2));
+    function _deployHook() internal {
         uint160 flags = uint160(Hooks.BEFORE_INITIALIZE_FLAG | Hooks.BEFORE_SWAP_FLAG);
         bytes memory args = abi.encode(IPoolManager(d.poolManager), IFeeEngine(d.feeEngine));
         (address expected, bytes32 salt) = HookMiner.find(CREATE2_FACTORY, flags, type(DynamicFeeHook).creationCode, args);
@@ -172,6 +219,11 @@ contract DeployAll is Script {
             deployer, guardian, IERC20(d.usdg), d.blsVerifier, d.feeEngine, IMorpho(d.morpho), d.stock, d.oracle, d.irm, LLTV
         );
         d.vault = address(vault);
+        _deployAdapterAndWire();
+    }
+
+    /// @dev Adapter for `d.vault` (Solidity or Stylus build — same ABI), then wiring.
+    function _deployAdapterAndWire() internal {
         d.adapter = address(
             new UniV4LiquidityAdapter(
                 IPoolManager(d.poolManager),
@@ -186,7 +238,7 @@ contract DeployAll is Script {
                 30 days
             )
         );
-        vault.setAdapter(d.adapter);
+        AgenticVaultSol(d.vault).setAdapter(d.adapter);
         FeeEngineSol(d.feeEngine).setUpdater(d.vault);
     }
 
@@ -194,7 +246,10 @@ contract DeployAll is Script {
         string memory o = "deployment";
         vm.serializeString(o, "network", vm.envOr("NETWORK_NAME", string("robinhood-testnet")));
         vm.serializeUint(o, "chainId", block.chainid);
-        vm.serializeString(o, "build", "solidity (ABI-identical to contracts/stylus; Stylus activations paused)");
+        bool isStylus = keccak256(bytes(vm.envOr("DEPLOY_PHASE", string("all")))) == keccak256("pool");
+        vm.serializeString(
+            o, "build", isStylus ? "stylus" : "solidity (ABI-identical to contracts/stylus; Stylus activations paused)"
+        );
         vm.serializeAddress(o, "vault", d.vault);
         vm.serializeAddress(o, "feeEngine", d.feeEngine);
         vm.serializeAddress(o, "blsVerifier", d.blsVerifier);
@@ -213,7 +268,7 @@ contract DeployAll is Script {
         vm.serializeBytes32(o, "marketId", d.marketId);
         vm.serializeAddress(o, "deployer", deployer);
         string memory json = vm.serializeAddress(o, "guardian", guardian);
-        string memory path = string.concat("../../deployments/", vm.envOr("NETWORK_NAME", string("robinhood-testnet")), ".json");
+        string memory path = _networkFile();
         vm.writeJson(json, path);
         console2.log("deployment written to", path);
         console2.log("vault", d.vault);

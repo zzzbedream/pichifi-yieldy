@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.26;
+pragma solidity 0.8.26;
 
 /// @notice ABI of the Rust/Stylus `FeeEngine` (and its ABI-identical Solidity build).
 interface IFeeEngine {

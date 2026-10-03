@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.26;
+pragma solidity 0.8.26;
 
 import {IIrm} from "morpho-blue/interfaces/IIrm.sol";
 import {MarketParams, Market} from "morpho-blue/interfaces/IMorpho.sol";
