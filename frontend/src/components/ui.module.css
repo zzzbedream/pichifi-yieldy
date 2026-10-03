@@ -55,12 +55,10 @@
 }
 
 .dotLive {
-  composes: dot;
   animation: pulse 1.8s var(--ease-out-expo) infinite;
 }
 
 .dotOff {
-  composes: dot;
   background: var(--ink-faint);
 }
 
@@ -103,13 +101,12 @@
   opacity: 0.45;
 }
 
-.buttonGhost {
-  composes: button;
+.ghost {
   background: transparent;
   color: var(--ink);
 }
 
-.buttonGhost:hover:not(:disabled) {
+.ghost:hover:not(:disabled) {
   background: var(--paper-sunk);
 }
 
@@ -221,15 +218,12 @@
 }
 
 .segIdle {
-  composes: segment;
   background: repeating-linear-gradient(-45deg, var(--leg-idle) 0 6px, transparent 6px 12px);
 }
 .segMorpho {
-  composes: segment;
   background: var(--leg-morpho);
 }
 .segUniswap {
-  composes: segment;
   background: var(--leg-uniswap);
 }
 
@@ -364,19 +358,16 @@
 }
 
 .badgeOk {
-  composes: badge;
   border-color: color-mix(in oklch, var(--ok) 50%, var(--rule));
   color: var(--ok);
 }
 
 .badgeWarn {
-  composes: badge;
   border-color: color-mix(in oklch, var(--warn) 50%, var(--rule));
   color: var(--warn);
 }
 
 .badgeBad {
-  composes: badge;
   border-color: color-mix(in oklch, var(--bad) 50%, var(--rule));
   color: var(--bad);
 }
@@ -484,13 +475,6 @@
 }
 
 .scenario {
-  composes: buttonGhost;
-  justify-content: space-between;
-  width: 100%;
-}
-
-.scenarioActive {
-  composes: button;
   justify-content: space-between;
   width: 100%;
 }

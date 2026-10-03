@@ -48,7 +48,8 @@ export function verifyWebhookSignature(secret: string, rawBody: string, signatur
 
 export async function buildServer(deps: ApiDeps): Promise<FastifyInstance> {
   const app = Fastify({ logger: false, bodyLimit: 256 * 1024 });
-  await app.register(cors, { origin: deps.corsOrigin.split(',').map((o) => o.trim()) });
+  const allowedOrigins = deps.corsOrigin.split(',').map((o) => o.trim());
+  await app.register(cors, { origin: allowedOrigins });
 
   app.addContentTypeParser('application/json', { parseAs: 'string' }, (_req, body, done) => {
     try {
@@ -73,12 +74,18 @@ export async function buildServer(deps: ApiDeps): Promise<FastifyInstance> {
   app.get('/decisions', async () => ({ decisions: deps.store.list() }));
 
   app.get('/stream', (request, reply) => {
+    // Take over the socket: Fastify must not try to send its own response on this route.
+    reply.hijack();
+    const origin = request.headers.origin;
+    const allowed = origin && allowedOrigins.includes(origin) ? { 'Access-Control-Allow-Origin': origin, Vary: 'Origin' } : {};
     reply.raw.writeHead(200, {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache',
       Connection: 'keep-alive',
-      'Access-Control-Allow-Origin': request.headers.origin ?? '*',
+      ...allowed,
     });
+    // Flush headers immediately so EventSource fires `open` without waiting for a heartbeat.
+    reply.raw.write(': connected\n\n');
     const send = (record: DecisionRecord) => reply.raw.write(`event: decision\ndata: ${JSON.stringify(record)}\n\n`);
     const heartbeat = setInterval(() => reply.raw.write(': ping\n\n'), 15_000);
     deps.store.events.on('decision', send);

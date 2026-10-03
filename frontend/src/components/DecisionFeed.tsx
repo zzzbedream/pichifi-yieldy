@@ -31,10 +31,10 @@ export function DecisionFeed({ decisions, isAgentReachable }: DecisionFeedProps)
 function StatusBadge({ record }: { record: DecisionRecord }) {
   if (record.status === 'executed') {
     const scheme = record.signer.scheme === 'bls' ? 'BLS12-381 (Amadeus)' : 'ECDSA';
-    return <span className={ui.badgeOk}>✓ {scheme} verified on-chain</span>;
+    return <span className={`${ui.badge} ${ui.badgeOk}`}>✓ {scheme} verified on-chain</span>;
   }
-  if (record.status === 'failed') return <span className={ui.badgeBad}>✕ rejected · {record.error ?? 'reverted'}</span>;
-  return <span className={ui.badgeWarn}>● signed · relaying</span>;
+  if (record.status === 'failed') return <span className={`${ui.badge} ${ui.badgeBad}`}>✕ rejected · {record.error ?? 'reverted'}</span>;
+  return <span className={`${ui.badge} ${ui.badgeWarn}`}>● signed · relaying</span>;
 }
 
 function DecisionItem({ record }: { record: DecisionRecord }) {
@@ -83,12 +83,12 @@ function DecisionItem({ record }: { record: DecisionRecord }) {
             signer {shortHex(record.signer.identity, 8, 6)}
           </span>
           {record.chain && (
-            <a className={ui.badge} href={record.chain.explorerUrl} target="_blank" rel="noreferrer">
+            <a className={ui.badge} href={record.chain.explorerUrl} target="_blank" rel="noopener noreferrer">
               Blockscout tx ↗
             </a>
           )}
           {record.amadeus && (
-            <a className={ui.badge} href={record.amadeus.explorerUrl} target="_blank" rel="noreferrer">
+            <a className={ui.badge} href={record.amadeus.explorerUrl} target="_blank" rel="noopener noreferrer">
               Amadeus anchor ↗
             </a>
           )}

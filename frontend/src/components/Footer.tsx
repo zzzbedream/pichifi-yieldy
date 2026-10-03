@@ -28,7 +28,7 @@ export function Footer({ agentIdentity }: { agentIdentity?: string }) {
             return (
               <div key={key} style={{ display: 'contents' }}>
                 <span>{LABELS[key]}</span>
-                <a className="mono" href={explorerAddress(address)} target="_blank" rel="noreferrer">
+                <a className="mono" href={explorerAddress(address)} target="_blank" rel="noopener noreferrer">
                   {shortHex(address, 10, 8)} ↗
                 </a>
               </div>

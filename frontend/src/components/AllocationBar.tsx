@@ -29,9 +29,9 @@ export function AllocationBar({ allocation, targetMorphoBps, targetUniswapBps, f
         role="img"
         aria-label={`Morpho ${Math.round(fMorpho * 100)}%, Uniswap ${Math.round(fUniswap * 100)}%, idle ${Math.round(fIdle * 100)}%`}
       >
-        <div className={ui.segMorpho} style={{ transform: `scaleX(${fMorpho})` }} />
-        <div className={ui.segUniswap} style={{ transform: `translateX(${fMorpho * 100}%) scaleX(${fUniswap})` }} />
-        <div className={ui.segIdle} style={{ transform: `translateX(${(fMorpho + fUniswap) * 100}%) scaleX(${fIdle})` }} />
+        <div className={`${ui.segment} ${ui.segMorpho}`} style={{ transform: `scaleX(${fMorpho})` }} />
+        <div className={`${ui.segment} ${ui.segUniswap}`} style={{ transform: `translateX(${fMorpho * 100}%) scaleX(${fUniswap})` }} />
+        <div className={`${ui.segment} ${ui.segIdle}`} style={{ transform: `translateX(${(fMorpho + fUniswap) * 100}%) scaleX(${fIdle})` }} />
       </div>
       <div className={ui.legs}>
         <Leg color="var(--leg-morpho)" name="Morpho Blue · safe harbour" value={morpho} fraction={fMorpho} note="Isolated USDG lending market — yield paid by borrowers." />

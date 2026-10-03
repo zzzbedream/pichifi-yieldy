@@ -84,7 +84,7 @@ export function PositionPanel({ sharePrice }: { sharePrice?: bigint }) {
             type="button"
             role="tab"
             aria-selected={mode === m}
-            className={mode === m ? ui.button : ui.buttonGhost}
+            className={mode === m ? ui.button : `${ui.button} ${ui.ghost}`}
             onClick={() => {
               setMode(m);
               setAmount('');
@@ -124,7 +124,7 @@ export function PositionPanel({ sharePrice }: { sharePrice?: bigint }) {
           {isBusy ? 'Confirming…' : label}
         </button>
         {mode === 'deposit' && (wallet.faucetCap ?? 0n) > 0n && (
-          <button type="button" className={ui.buttonGhost} disabled={!isConnected || isBusy} onClick={handleFaucet}>
+          <button type="button" className={`${ui.button} ${ui.ghost}`} disabled={!isConnected || isBusy} onClick={handleFaucet}>
             Get 100k test USDG
           </button>
         )}

@@ -89,7 +89,7 @@ export function DemoControls({ state, onChanged }: DemoControlsProps) {
           <button
             key={id}
             type="button"
-            className={id === active ? ui.scenarioActive : ui.scenario}
+            className={`${ui.button} ${ui.scenario} ${id === active ? '' : ui.ghost}`}
             disabled={busy !== null || !token}
             onClick={() => void choose(id)}
           >

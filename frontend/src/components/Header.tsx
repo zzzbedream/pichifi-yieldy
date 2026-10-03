@@ -17,7 +17,7 @@ export function Header({ isStreaming }: HeaderProps) {
       </div>
       <div className={ui.headerMeta}>
         <span className={ui.pill} title="Agent decision stream">
-          <span className={isStreaming ? ui.dotLive : ui.dotOff} aria-hidden />
+          <span className={`${ui.dot} ${isStreaming ? ui.dotLive : ui.dotOff}`} aria-hidden />
           {isStreaming ? 'Agent live' : 'Agent offline'}
         </span>
         <span className={ui.pill}>{robinhoodTestnet.name} · {robinhoodTestnet.id}</span>
@@ -46,7 +46,7 @@ function ConnectButton() {
   }
   if (isConnected) {
     return (
-      <button className={ui.buttonGhost} type="button" onClick={() => disconnect.mutate()} title="Disconnect">
+      <button className={`${ui.button} ${ui.ghost}`} type="button" onClick={() => disconnect.mutate()} title="Disconnect">
         <span className="mono">{shortHex(address)}</span>
       </button>
     );

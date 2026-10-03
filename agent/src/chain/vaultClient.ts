@@ -40,6 +40,9 @@ export const RETRYABLE_ERRORS = new Set(['RebalanceTooSoon']);
 
 export type Preflight = { ok: true } | { ok: false; errorName: string; message: string; retryable: boolean };
 
+/** Preflight runs this many seconds in the past to absorb clock skew. */
+export const PREFLIGHT_SKEW_SECONDS = 5n;
+
 /** Gas limit for `executeIntent` (BLS verify + Morpho + v4 unwind/deploy, plus L1 data). */
 export const EXECUTE_INTENT_GAS = 6_000_000n;
 
@@ -134,7 +137,8 @@ export function createVaultClient(config: Config): VaultClient {
     // while the real transaction lands in a fresh block.
     async preflight(i, signature) {
       try {
-        const time = await this.now();
+        // A few seconds early, so local clock skew cannot make a passing preflight revert on-chain.
+        const time = (await this.now()) - PREFLIGHT_SKEW_SECONDS;
         await publicClient.call({
           account,
           to: address,
