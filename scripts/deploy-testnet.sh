@@ -13,12 +13,13 @@ echo "==> exporting agent public identity"
 (cd "$ROOT/agent" && pnpm -s tsx scripts/agent-identity.ts)
 
 echo "==> deploying to $NETWORK ($RPC)"
-(cd "$ROOT/contracts/evm" && NETWORK_NAME="$NETWORK" forge script script/DeployAll.s.sol \
-  --rpc-url "$RPC" --broadcast --slow   --verify --verifier blockscout --verifier-url "$EXPLORER/api/") || {
-  echo "!! deploy or verification failed; if the broadcast succeeded, re-run scripts/verify-testnet.sh"; exit 1; }
+(cd "$ROOT/contracts/evm" && NETWORK_NAME="$NETWORK" forge script script/DeployAll.s.sol   --rpc-url "$RPC" --broadcast --slow)
+
+echo "==> verifying on Blockscout ($EXPLORER) — non-fatal, re-run scripts/verify-testnet.sh if needed"
+"$ROOT/scripts/verify-testnet.sh" || echo "!! some verifications failed; re-run scripts/verify-testnet.sh"
 
 DEPLOY="$ROOT/deployments/$NETWORK.json"
-VAULT=$(node -e "console.log(require('$DEPLOY').vault)")
+VAULT=$(node -e "console.log(require(require('path').resolve(process.argv[1])).vault)" "$DEPLOY")
 echo "==> vault $VAULT"
 
 # Point the agent at the new vault (.env is gitignored).
@@ -29,4 +30,4 @@ else
 fi
 
 node "$ROOT/scripts/sync-frontend-env.mjs" "$NETWORK" "${AGENT_PUBLIC_URL:-http://localhost:8787}"
-echo "==> done. Contracts verified on $EXPLORER. Next: start the agent (cd agent && pnpm start) and the dashboard."
+echo "==> done. Next: start the agent (cd agent && pnpm start) and the dashboard (cd frontend && pnpm dev)."
