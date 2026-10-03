@@ -57,8 +57,8 @@ contract AgenticVaultSystemTest is Test, Deployers {
         deployFreshManagerAndRouters();
         vm.warp(1_790_000_000);
 
-        usdg = new TestToken("Global Dollar (Testnet Mock)", "USDG", 6, address(this));
-        stock = new TestToken("NVIDIA Stock Token (Testnet, No Real Value)", "rhNVDA", 18, address(this));
+        usdg = new TestToken("Global Dollar (Testnet Mock)", "USDG", 6, address(this), 1_000_000e6);
+        stock = new TestToken("NVIDIA Stock Token (Testnet, No Real Value)", "rhNVDA", 18, address(this), 0);
         oracle = new StockPriceOracle(address(this), int256(PRICE_E8), 6, 18);
         usdgIs0 = address(usdg) < address(stock);
 
