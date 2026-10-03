@@ -6,7 +6,7 @@ members = ["fee-engine", "ecdsa-verifier", "bls-verifier", "vault"]
 version = "0.1.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/agentic-yield-vaults/agentic-yield-vaults"
+repository = "https://github.com/zzzbedream/pichifi-yieldy"
 
 [workspace.dependencies]
 alloy-primitives = { version = "1.5.7", default-features = false }
