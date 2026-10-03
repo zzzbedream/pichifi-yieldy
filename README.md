@@ -124,6 +124,20 @@ cd frontend && pnpm install && pnpm dev
 cd agent && pnpm tsx scripts/e2e-demo.ts robinhood-testnet
 ```
 
+**Production-style hosting.**
+- **Agent:** runs on a VPS. `sudo -E bash scripts/bootstrap-vps.sh agent.example.com` installs Docker, Node, pnpm, pm2, Foundry, Rust + cargo-stylus and Caddy (HTTPS, SSE-safe proxy). Then run `pm2 start deploy/ecosystem.config.cjs`.
+- **Dashboard:** deploys to Vercel with the root directory set to `frontend/`. Copy the `NEXT_PUBLIC_*` values from `frontend/.env.local`.
+
+### Run the canonical Rust/Stylus build
+
+Stylus activation works on a local Nitro devnode. `scripts/stylus-devnode.sh` (Linux with Docker) runs:
+1. `DeployAll` phase `infra` (tokens, oracle, Morpho, a v4 PoolManager)
+2. `cargo stylus deploy` of `fee-engine`, `bls-verifier` and `vault`
+3. phase `pool` (hook, pool and adapter wired to the Rust vault)
+4. the agent and the same E2E demo against the Rust vault
+
+The phased orchestration passes the full E2E on a clean chain. `cargo stylus export-abi` confirms that the Rust vault exposes the same ABI as the Solidity build (`executeIntent`, `allocation`, `agentState`, `setAdapter`, …).
+
 ## Tests
 
 | Suite | Command | Result |
