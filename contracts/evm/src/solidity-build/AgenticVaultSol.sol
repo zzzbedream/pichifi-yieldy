@@ -178,6 +178,7 @@ contract AgenticVaultSol is ERC4626, EIP712, ReentrancyGuard {
     }
 
     function mint(uint256 shares, address receiver) public override nonReentrant whenNotPaused returns (uint256) {
+        if (shares == 0) revert ZeroAmount();
         return super.mint(shares, receiver);
     }
 
@@ -284,7 +285,7 @@ contract AgenticVaultSol is ERC4626, EIP712, ReentrancyGuard {
         _targetUniswapBps = uniswapBps;
         _lastInputsHash = inputsHash;
 
-        _rebalance(morphoBps, uniswapBps);
+        _rebalance(morphoBps, uniswapBps, true);
         IFeeEngineWriter(_feeEngine).setRegime(regime, volBps);
         emit IntentExecuted(nonce_, regime, morphoBps, uniswapBps, volBps, inputsHash, modelVersion, digest);
     }
@@ -343,10 +344,11 @@ contract AgenticVaultSol is ERC4626, EIP712, ReentrancyGuard {
         emit PausedSet(paused_);
     }
 
+    /// @dev No NAV-loss bound: the guardian explicitly accepts the unwind cost to get out.
     function emergencyExit() external nonReentrant onlyGuardianOrOwner {
         _paused = true;
         emit PausedSet(true);
-        _rebalance(0, 0);
+        _rebalance(0, 0, false);
         emit EmergencyExit(_idle());
     }
 
@@ -390,7 +392,7 @@ contract AgenticVaultSol is ERC4626, EIP712, ReentrancyGuard {
         if (i.uniswapBps > 0 && _adapter == address(0)) revert AdapterNotSet();
     }
 
-    function _rebalance(uint256 morphoBps, uint256 uniswapBps) internal {
+    function _rebalance(uint256 morphoBps, uint256 uniswapBps, bool enforceNavBound) internal {
         _morphoAccrue();
         VaultMath.Holdings memory before = _holdings();
 
@@ -410,7 +412,7 @@ contract AgenticVaultSol is ERC4626, EIP712, ReentrancyGuard {
         }
 
         VaultMath.Holdings memory afterH = _holdings();
-        if (!VaultMath.navWithinTolerance(before.total(), afterH.total(), _maxNavLossBps)) {
+        if (enforceNavBound && !VaultMath.navWithinTolerance(before.total(), afterH.total(), _maxNavLossBps)) {
             revert NavLossExceeded(before.total(), afterH.total());
         }
         emit Rebalanced(afterH.idle, afterH.morpho, afterH.uniswap, before.total(), afterH.total());

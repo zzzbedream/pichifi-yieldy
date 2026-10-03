@@ -33,6 +33,7 @@ export function PositionPanel({ sharePrice }: { sharePrice?: bigint }) {
 
   async function send(request: Parameters<typeof write.mutateAsync>[0]) {
     setError(null);
+    setPendingHash(undefined);
     try {
       const hash = await write.mutateAsync(request);
       setPendingHash(hash);
@@ -88,6 +89,8 @@ export function PositionPanel({ sharePrice }: { sharePrice?: bigint }) {
             onClick={() => {
               setMode(m);
               setAmount('');
+              setPendingHash(undefined);
+              setError(null);
             }}
           >
             {m === 'deposit' ? 'Deposit USDG' : 'Redeem shares'}

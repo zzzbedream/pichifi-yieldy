@@ -84,6 +84,17 @@ describe('agent API', () => {
     expect(engine.trigger).toHaveBeenCalledWith('webhook');
   });
 
+  it('answers 400 (not 500) to malformed JSON', async () => {
+    const { app } = await server();
+    const res = await app.inject({
+      method: 'POST',
+      url: '/scenario',
+      headers: { 'content-type': 'application/json', authorization: `Bearer ${TOKEN}` },
+      payload: '{"scenario": ',
+    });
+    expect(res.statusCode).toBe(400);
+  });
+
   it('verifyWebhookSignature accepts sha256= prefix and rejects missing signatures', () => {
     const sig = createHmac('sha256', SECRET).update('x').digest('hex');
     expect(verifyWebhookSignature(SECRET, 'x', `sha256=${sig}`)).toBe(true);

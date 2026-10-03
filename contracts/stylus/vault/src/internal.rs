@@ -72,7 +72,9 @@ impl AgenticVault {
 
     /// Moves the vault to the target split. Phase 1 unwinds the LP leg (real proceeds are
     /// only known afterwards); phase 2 sizes Morpho and LP moves from actual balances.
-    pub(crate) fn rebalance(&mut self, morpho_bps: u16, uniswap_bps: u16) -> Result<(), VaultError> {
+    /// `enforce_nav_bound` is false only for the guardian's `emergency_exit`, which explicitly
+    /// accepts the unwind cost.
+    pub(crate) fn rebalance(&mut self, morpho_bps: u16, uniswap_bps: u16, enforce_nav_bound: bool) -> Result<(), VaultError> {
         self.morpho_accrue()?;
         let before = self.holdings()?;
         let min_move = self.min_move.get();
@@ -99,7 +101,7 @@ impl AgenticVault {
         let after = self.holdings()?;
         let (nav_before, nav_after) = (before.total(), after.total());
         let max_loss = self.max_nav_loss_bps.get().to::<u16>();
-        if !math::nav_within_tolerance(nav_before, nav_after, max_loss) {
+        if enforce_nav_bound && !math::nav_within_tolerance(nav_before, nav_after, max_loss) {
             return Err(VaultError::NavLossExceeded(NavLossExceeded {
                 navBefore: nav_before,
                 navAfter: nav_after,

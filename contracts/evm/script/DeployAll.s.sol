@@ -182,7 +182,8 @@ contract DeployAll is Script {
                 LPFeeLibrary.DYNAMIC_FEE_FLAG,
                 TICK_SPACING,
                 d.hook,
-                1_000
+                1_000,
+                30 days
             )
         );
         vault.setAdapter(d.adapter);

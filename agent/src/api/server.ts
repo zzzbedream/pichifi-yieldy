@@ -56,7 +56,7 @@ export async function buildServer(deps: ApiDeps): Promise<FastifyInstance> {
       const text = typeof body === 'string' ? body : body.toString('utf8');
       done(null, { raw: text, json: text.length ? JSON.parse(text) : {} });
     } catch {
-      done(new Error('Invalid JSON body'), undefined);
+      done(Object.assign(new Error('Invalid JSON body'), { statusCode: 400 }), undefined);
     }
   });
 
@@ -86,13 +86,19 @@ export async function buildServer(deps: ApiDeps): Promise<FastifyInstance> {
     });
     // Flush headers immediately so EventSource fires `open` without waiting for a heartbeat.
     reply.raw.write(': connected\n\n');
-    const send = (record: DecisionRecord) => reply.raw.write(`event: decision\ndata: ${JSON.stringify(record)}\n\n`);
-    const heartbeat = setInterval(() => reply.raw.write(': ping\n\n'), 15_000);
-    deps.store.events.on('decision', send);
-    request.raw.on('close', () => {
+    const write = (chunk: string) => {
+      if (!reply.raw.destroyed && reply.raw.writable) reply.raw.write(chunk);
+    };
+    const send = (record: DecisionRecord) => write(`event: decision\ndata: ${JSON.stringify(record)}\n\n`);
+    const heartbeat = setInterval(() => write(': ping\n\n'), 15_000);
+    const cleanup = () => {
       clearInterval(heartbeat);
       deps.store.events.off('decision', send);
-    });
+    };
+    deps.store.events.on('decision', send);
+    // A socket destroyed by a proxy/client must never surface as an uncaught 'error' event.
+    reply.raw.on('error', cleanup);
+    request.raw.on('close', cleanup);
   });
 
   app.post('/scenario', async (request, reply) => {

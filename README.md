@@ -129,8 +129,8 @@ cd agent && pnpm tsx scripts/e2e-demo.ts robinhood-testnet
 | Suite | Command | Result |
 |---|---|---|
 | Rust/Stylus (share math, allocation planning, EIP-712 parity, BLS pipeline, access control) | `cargo test --workspace` | 54 passing |
-| Solidity (full system with real v4 PoolManager + Morpho Blue, BLS verifier) | `forge test` | 20 passing |
-| Agent (policy determinism, signers, engine, API auth/HMAC) | `pnpm -C agent test` | 29 passing |
+| Solidity (full system with real v4 PoolManager + Morpho Blue, BLS verifier) | `forge test` | 24 passing |
+| Agent (policy determinism, signers, engine, API auth/HMAC) | `pnpm -C agent test` | 30 passing |
 | Dashboard formatters | `pnpm -C frontend exec vitest run` | 6 passing |
 | End-to-end on a Robinhood testnet fork | `scripts/e2e-demo.ts` | 10/10 checks |
 

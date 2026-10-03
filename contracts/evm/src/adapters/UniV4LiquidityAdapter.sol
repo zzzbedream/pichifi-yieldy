@@ -18,6 +18,10 @@ import {PriceMath} from "./PriceMath.sol";
 
 interface IPriceFeed {
     function latestAnswer() external view returns (int256);
+    function latestRoundData()
+        external
+        view
+        returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound);
 }
 
 /// @title UniV4LiquidityAdapter
@@ -54,6 +58,8 @@ contract UniV4LiquidityAdapter is IUnlockCallback {
     int24 public immutable tickLower;
     int24 public immutable tickUpper;
     uint256 public immutable maxDeviationBps;
+    /// @notice LP actions are refused when the reference price is older than this.
+    uint256 public immutable maxOracleAge;
 
     event Deployed(uint256 usdgIn, uint256 stockBought, uint128 liquidityAdded);
     event Unwound(uint256 bps, uint128 liquidityRemoved, uint256 usdgOut);
@@ -63,6 +69,7 @@ contract UniV4LiquidityAdapter is IUnlockCallback {
     error InvalidBps(uint256 bps);
     error PriceDeviation(uint256 poolPriceE8, uint256 oraclePriceE8);
     error InvalidOraclePrice();
+    error StaleOraclePrice(uint256 updatedAt);
 
     modifier onlyVault() {
         if (msg.sender != vault) revert OnlyVault();
@@ -78,7 +85,8 @@ contract UniV4LiquidityAdapter is IUnlockCallback {
         uint24 fee_,
         int24 tickSpacing_,
         address hooks_,
-        uint256 maxDeviationBps_
+        uint256 maxDeviationBps_,
+        uint256 maxOracleAge_
     ) {
         poolManager = poolManager_;
         vault = vault_;
@@ -94,6 +102,7 @@ contract UniV4LiquidityAdapter is IUnlockCallback {
         tickLower = (TickMath.MIN_TICK / tickSpacing_) * tickSpacing_;
         tickUpper = (TickMath.MAX_TICK / tickSpacing_) * tickSpacing_;
         maxDeviationBps = maxDeviationBps_;
+        maxOracleAge = maxOracleAge_;
     }
 
     // ------------------------------------------------------------------ views
@@ -124,16 +133,26 @@ contract UniV4LiquidityAdapter is IUnlockCallback {
         return uint256(answer);
     }
 
-    /// @notice USDG value of the position + any balances held here, stock valued at the oracle.
+    /// @notice Fair USDG value of the position + balances held here.
+    /// @dev Manipulation-resistant: the position's token split is computed at the ORACLE price,
+    ///      never at the pool's spot price, so moving the pool cannot move the vault's NAV.
+    ///      Deliberately no staleness revert here: NAV reads gate redemptions, which must never block.
     function totalValue() external view returns (uint256) {
-        (uint160 sqrtPriceX96,,,) = poolManager.getSlot0(poolKey().toId());
-        (uint256 amount0, uint256 amount1) = LiquidityAmounts.getAmountsForLiquidity(
-            sqrtPriceX96, TickMath.getSqrtPriceAtTick(tickLower), TickMath.getSqrtPriceAtTick(tickUpper), positionLiquidity()
-        );
-        (uint256 usdgAmount, uint256 stockAmount) = usdgIsCurrency0 ? (amount0, amount1) : (amount1, amount0);
-        usdgAmount += usdg.balanceOf(address(this));
-        stockAmount += stock.balanceOf(address(this));
-        return usdgAmount + PriceMath.stockValue(stockAmount, oraclePriceE8(), usdgDecimals, stockDecimals);
+        uint128 liquidity = positionLiquidity();
+        uint256 usdgAmount = usdg.balanceOf(address(this));
+        uint256 stockAmount = stock.balanceOf(address(this));
+        if (liquidity == 0 && stockAmount == 0) return usdgAmount;
+        uint256 priceE8 = oraclePriceE8();
+        if (liquidity > 0) {
+            uint160 fairSqrtPrice = PriceMath.sqrtPriceX96FromPriceE8(priceE8, usdgIsCurrency0, usdgDecimals, stockDecimals);
+            (uint256 amount0, uint256 amount1) = LiquidityAmounts.getAmountsForLiquidity(
+                fairSqrtPrice, TickMath.getSqrtPriceAtTick(tickLower), TickMath.getSqrtPriceAtTick(tickUpper), liquidity
+            );
+            (uint256 usdgInLp, uint256 stockInLp) = usdgIsCurrency0 ? (amount0, amount1) : (amount1, amount0);
+            usdgAmount += usdgInLp;
+            stockAmount += stockInLp;
+        }
+        return usdgAmount + PriceMath.stockValue(stockAmount, priceE8, usdgDecimals, stockDecimals);
     }
 
     // ------------------------------------------------------------------ vault actions
@@ -263,6 +282,8 @@ contract UniV4LiquidityAdapter is IUnlockCallback {
     }
 
     function _checkPrice() internal view {
+        (,,, uint256 updatedAt,) = oracle.latestRoundData();
+        if (block.timestamp > updatedAt + maxOracleAge) revert StaleOraclePrice(updatedAt);
         uint256 poolPrice = poolPriceE8();
         uint256 oraclePrice = oraclePriceE8();
         if (PriceMath.deviationBps(poolPrice, oraclePrice) > maxDeviationBps) {

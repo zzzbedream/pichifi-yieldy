@@ -397,7 +397,7 @@ impl AgenticVault {
         self.target_uniswap_bps.set(U16::from(uniswap_bps));
         self.last_inputs_hash.set(inputs_hash);
 
-        self.rebalance(morpho_bps, uniswap_bps)?;
+        self.rebalance(morpho_bps, uniswap_bps, true)?;
         self.call_mut(
             self.fee_engine.get(),
             IFeeEngine::setRegimeCall { regime, volBps: vol_bps }.abi_encode(),
@@ -518,12 +518,13 @@ impl AgenticVault {
         Ok(())
     }
 
-    /// Unwinds every position back to idle USDG and pauses the vault.
+    /// Unwinds every position back to idle USDG and pauses the vault. No NAV-loss bound:
+    /// the guardian explicitly accepts the unwind cost to get out.
     pub fn emergency_exit(&mut self) -> Result<(), VaultError> {
         self.only_guardian_or_owner()?;
         self.paused.set(true);
         self.vm().log(PausedSet { paused: true });
-        self.rebalance(0, 0)?;
+        self.rebalance(0, 0, false)?;
         let idle = self.idle_assets()?;
         self.vm().log(EmergencyExit { idleAfter: idle });
         Ok(())

@@ -35,6 +35,7 @@ export class DecisionStore {
   private readonly file: string | null;
 
   constructor(dataDir: string | null) {
+    this.events.setMaxListeners(0); // one listener per open dashboard stream
     this.file = dataDir ? join(dataDir, 'decisions.json') : null;
     if (dataDir) mkdirSync(dataDir, { recursive: true });
     if (this.file && existsSync(this.file)) {

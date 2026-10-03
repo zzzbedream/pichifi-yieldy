@@ -73,7 +73,7 @@ contract AgenticVaultSystemTest is Test, Deployers {
         );
         adapter = new UniV4LiquidityAdapter(
             manager, address(vault), IERC20(address(usdg)), IERC20(address(stock)), IPriceFeed(address(oracle)),
-            LPFeeLibrary.DYNAMIC_FEE_FLAG, 60, address(hook), 1_000
+            LPFeeLibrary.DYNAMIC_FEE_FLAG, 60, address(hook), 1_000, 90 days
         );
         vault.setAdapter(address(adapter));
         feeEngine.setUpdater(address(vault));
@@ -282,6 +282,37 @@ contract AgenticVaultSystemTest is Test, Deployers {
         assertEq(inMorpho + inLp, 0);
         assertApproxEqRel(idle, 100_000e6, 0.02e18);
         assertTrue(vault.paused());
+    }
+
+    /// @dev Security review regression: NAV must not follow the pool's spot price.
+    function test_navIgnoresSpotPriceManipulation() public {
+        _execute(0, 5_000, 5_000, 0);
+        uint256 navBefore = vault.totalAssets();
+        int256 bought = _swapUsdgForStock(2_500_000e6); // pushes the pool >10% above the oracle
+        uint256 navManipulated = vault.totalAssets();
+        assertApproxEqRel(navManipulated, navBefore, 0.005e18, "spot manipulation must not move NAV");
+        _swapStockBack(uint256(bought));
+    }
+
+    /// @dev Security review regression: the guardian's exit ignores the agent NAV-loss bound.
+    function test_emergencyExitSucceedsBeyondNavLossBound() public {
+        _execute(0, 5_000, 5_000, 0);
+        vault.setGuardrails(7_000, 30, 0, 1e6); // zero tolerated loss
+        vm.prank(guardian);
+        vault.emergencyExit();
+        (, uint256 inMorpho, uint256 inLp) = vault.allocation();
+        assertEq(inMorpho + inLp, 0);
+    }
+
+    function test_staleOracleBlocksLpActions() public {
+        vm.warp(block.timestamp + 91 days);
+        vm.expectRevert();
+        this.executeIntentExternal(0, 5_000, 5_000, 0);
+    }
+
+    function test_mintZeroReverts() public {
+        vm.expectRevert(AgenticVaultSol.ZeroAmount.selector);
+        vault.mint(0, investor);
     }
 
     function test_onlyVaultCanMoveAdapterFunds() public {

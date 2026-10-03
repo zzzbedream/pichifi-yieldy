@@ -84,12 +84,18 @@ export class AgentEngine {
     }
   }
 
+  private retryAt = 0;
+
+  /** Keeps the earliest pending retry: a shorter wait replaces a longer scheduled one. */
   private scheduleRetry(seconds: number): void {
-    if (this.retryTimer) return;
+    const at = Date.now() + (seconds + 2) * 1000;
+    if (this.retryTimer && at >= this.retryAt) return;
+    if (this.retryTimer) clearTimeout(this.retryTimer);
+    this.retryAt = at;
     this.retryTimer = setTimeout(() => {
       this.retryTimer = null;
       void this.trigger('timer');
-    }, (seconds + 2) * 1000);
+    }, at - Date.now());
   }
 
   private async run(reason: Trigger): Promise<void> {
