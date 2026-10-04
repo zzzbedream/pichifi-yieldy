@@ -2,7 +2,8 @@
 # One-time setup of an Ubuntu 22.04/24.04 VPS for Agentic Yield Vaults:
 # Docker (Stylus reproducible builds + nitro-devnode), Node 22 + pnpm + pm2, Foundry,
 # Rust 1.91 + wasm32 + cargo-stylus 0.10.10, Caddy (HTTPS for the agent API).
-# Usage: sudo -E bash scripts/bootstrap-vps.sh <agent-domain>   (e.g. agent.example.com)
+# Usage: sudo -E bash scripts/bootstrap-vps.sh <agent-domain>   (e.g. 147-93-178-184.sslip.io)
+#        SKIP_STYLUS=1 to skip the Rust/cargo-stylus toolchain (hosted fork demo only).
 set -euo pipefail
 
 DOMAIN="${1:-}"
@@ -29,10 +30,14 @@ npm install -g pnpm@11 pm2
 echo "==> foundry"
 as_user 'command -v forge >/dev/null || (curl -L https://foundry.paradigm.xyz | bash && ~/.foundry/bin/foundryup)'
 
-echo "==> rust 1.91 + wasm32 + cargo-stylus (limited parallelism to avoid OOM)"
-as_user 'command -v rustup >/dev/null || curl --proto "=https" --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal'
-as_user 'source ~/.cargo/env && rustup toolchain install 1.91.0 --profile minimal -t wasm32-unknown-unknown'
-as_user 'source ~/.cargo/env && (command -v cargo-stylus >/dev/null || cargo install --locked -j 4 cargo-stylus --version 0.10.10)'
+if [ "${SKIP_STYLUS:-0}" != "1" ]; then
+  echo "==> rust 1.91 + wasm32 + cargo-stylus (limited parallelism to avoid OOM)"
+  as_user 'command -v rustup >/dev/null || curl --proto "=https" --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal'
+  as_user 'source ~/.cargo/env && rustup toolchain install 1.91.0 --profile minimal -t wasm32-unknown-unknown'
+  as_user 'source ~/.cargo/env && (command -v cargo-stylus >/dev/null || cargo install --locked -j 4 cargo-stylus --version 0.10.10)'
+else
+  echo "==> SKIP_STYLUS=1: skipping Rust/cargo-stylus (not needed for the hosted fork demo)"
+fi
 
 echo "==> caddy"
 if ! command -v caddy >/dev/null; then
