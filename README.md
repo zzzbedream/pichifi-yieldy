@@ -96,13 +96,18 @@ Explorer: https://explorer.testnet.chain.robinhood.com. Full list in [`deploymen
 
 | Contract | Address |
 |---|---|
-| AgenticVault (Solidity build) | _filled by `scripts/deploy-testnet.sh`_ |
-| AmadeusBlsVerifier | |
-| FeeEngine | |
-| DynamicFeeHook | |
-| UniV4LiquidityAdapter | |
-| Morpho Blue | |
-| Uniswap v4 PoolManager | `0x8366a39CC670B4001A1121B8F6A443A643e40951` |
+| AgenticVault (Solidity build) | [`0x60690F414006008984801DBc550C1348B256820f`](https://explorer.testnet.chain.robinhood.com/address/0x60690F414006008984801DBc550C1348B256820f) |
+| AmadeusBlsVerifier | [`0x7Cf497746E6CB0e8314134EDd42d66b609960c80`](https://explorer.testnet.chain.robinhood.com/address/0x7Cf497746E6CB0e8314134EDd42d66b609960c80) |
+| FeeEngine | [`0xf94e41b1D4e13AC2d44DF554b829FE6994101a1d`](https://explorer.testnet.chain.robinhood.com/address/0xf94e41b1D4e13AC2d44DF554b829FE6994101a1d) |
+| DynamicFeeHook | [`0x504B1453c6Fefe585D9Bf8fCf092aBb074Cce080`](https://explorer.testnet.chain.robinhood.com/address/0x504B1453c6Fefe585D9Bf8fCf092aBb074Cce080) |
+| UniV4LiquidityAdapter | [`0x333a96748260e55342baA06d4e633757093EFBC4`](https://explorer.testnet.chain.robinhood.com/address/0x333a96748260e55342baA06d4e633757093EFBC4) |
+| Morpho Blue | [`0x29977b23d3614EaF0FE221a1d1615b07a6b263C6`](https://explorer.testnet.chain.robinhood.com/address/0x29977b23d3614EaF0FE221a1d1615b07a6b263C6) |
+| Test USDG | [`0xF11879E4384E1F0291e40D8A10262785e812884D`](https://explorer.testnet.chain.robinhood.com/address/0xF11879E4384E1F0291e40D8A10262785e812884D) |
+| rhNVDA (test Stock Token) | [`0x44709536c479f8455641421BE8C04eEb66C85F86`](https://explorer.testnet.chain.robinhood.com/address/0x44709536c479f8455641421BE8C04eEb66C85F86) |
+| StockPriceOracle | [`0x9A37a331Bf8047cb505dB0EE39F5F416Ab2C4F42`](https://explorer.testnet.chain.robinhood.com/address/0x9A37a331Bf8047cb505dB0EE39F5F416Ab2C4F42) |
+| Uniswap v4 PoolManager (Robinhood) | [`0x8366a39CC670B4001A1121B8F6A443A643e40951`](https://explorer.testnet.chain.robinhood.com/address/0x8366a39CC670B4001A1121B8F6A443A643e40951) |
+
+Morpho market id: `0x16b03529a2b45adaf096bae7cb573120bb0fdf60a0550dce0830b79894e9291a`. Uniswap v4 pool id: `0xb3205e2102b7b4baa5901d0f724d66c5c97758f7059889be536b06f9fcdd7763`.
 
 ## Run it
 
