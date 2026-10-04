@@ -155,7 +155,7 @@ The phased orchestration passes the full E2E on a clean chain. `cargo stylus exp
 | Solidity (full system with real v4 PoolManager + Morpho Blue, BLS verifier) | `forge test` | 24 passing |
 | Agent (policy determinism, signers, engine, API auth/HMAC) | `pnpm -C agent test` | 30 passing |
 | Dashboard formatters | `pnpm -C frontend exec vitest run` | 6 passing |
-| End-to-end on a Robinhood testnet fork | `scripts/e2e-demo.ts` | 10/10 checks |
+| End-to-end on **live Robinhood testnet** (and on a fork) | `scripts/e2e-demo.ts` | 10/10 checks |
 
 The BLS pipeline (hash-to-field off-chain, then `MAP_FP2_TO_G2` ×2 → `G2ADD` → `PAIRING_CHECK`) is also proven against the **live** Robinhood testnet precompiles by `agent/scripts/bls-vectors.ts`.
 
