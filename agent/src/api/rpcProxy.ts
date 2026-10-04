@@ -47,15 +47,17 @@ export function firstDisallowedMethod(body: unknown): string | null {
 
 export function registerRpcProxy(app: FastifyInstance, upstream: string): void {
   app.post('/rpc', async (request, reply) => {
-    const parsed = (request.body as { raw?: string; json?: unknown } | undefined) ?? {};
-    const blocked = firstDisallowedMethod(parsed.json);
+    // Validate and forward the SAME parsed object (re-serialized): forwarding the raw text would
+    // let parser differentials (e.g. duplicate "method" keys) smuggle a blocked method upstream.
+    const body = (request.body as { json?: unknown } | undefined)?.json;
+    const blocked = firstDisallowedMethod(body);
     if (blocked !== null) {
       return reply.code(403).send({ jsonrpc: '2.0', id: null, error: { code: -32601, message: `method not allowed: ${blocked}` } });
     }
     const res = await fetch(upstream, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: parsed.raw ?? JSON.stringify(parsed.json),
+      body: JSON.stringify(body),
     });
     reply.code(res.status).header('content-type', 'application/json');
     return reply.send(await res.text());

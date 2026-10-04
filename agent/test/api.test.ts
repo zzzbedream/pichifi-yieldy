@@ -153,3 +153,12 @@ describe('fork RPC proxy', () => {
     await srv.close();
   });
 });
+
+describe('fork RPC proxy smuggling', () => {
+  it('validates the parsed method that is actually forwarded (duplicate keys)', async () => {
+    const { firstDisallowedMethod } = await import('../src/api/rpcProxy.js');
+    const smuggled = JSON.parse('{"jsonrpc":"2.0","id":1,"method":"eth_call","method":"anvil_setBalance"}');
+    expect(firstDisallowedMethod(smuggled)).toBe('anvil_setBalance');
+    expect(JSON.stringify(smuggled)).not.toContain('eth_call');
+  });
+});
