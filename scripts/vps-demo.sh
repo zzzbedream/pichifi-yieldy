@@ -51,8 +51,16 @@ wait_http http://127.0.0.1:8787/health || { echo "agent did not start (pm2 logs 
 pm2 save >/dev/null
 
 PUBLIC="${AGENT_PUBLIC_URL:-https://<your-domain>}"
-node "$ROOT/scripts/sync-frontend-env.mjs" vps-fork "$PUBLIC" >/dev/null
-sed -i "s#^NEXT_PUBLIC_RPC_URL=.*#NEXT_PUBLIC_RPC_URL=$PUBLIC/rpc#" "$ROOT/frontend/.env.local"
+if [ -n "$VERCEL_URL" ]; then
+  # Vercel proxies /agent/* and /rpc to the VPS (frontend/next.config.ts), so the dashboard,
+  # its API and the wallet RPC all live on the Vercel domain.
+  node "$ROOT/scripts/sync-frontend-env.mjs" vps-fork "$VERCEL_URL/agent" >/dev/null
+  sed -i "s#^NEXT_PUBLIC_RPC_URL=.*#NEXT_PUBLIC_RPC_URL=$VERCEL_URL/rpc#" "$ROOT/frontend/.env.local"
+  echo "AGENT_ORIGIN=$PUBLIC" >> "$ROOT/frontend/.env.local"
+else
+  node "$ROOT/scripts/sync-frontend-env.mjs" vps-fork "$PUBLIC" >/dev/null
+  sed -i "s#^NEXT_PUBLIC_RPC_URL=.*#NEXT_PUBLIC_RPC_URL=$PUBLIC/rpc#" "$ROOT/frontend/.env.local"
+fi
 echo
 echo "Ready. Vercel environment variables (Project Settings -> Environment Variables):"
 cat "$ROOT/frontend/.env.local"
