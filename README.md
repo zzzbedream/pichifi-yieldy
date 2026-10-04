@@ -9,6 +9,8 @@ Investors deposit **USDG**. An agent with an **Amadeus Protocol** identity reads
 The vault is written in **Rust for Arbitrum Stylus**. It only moves funds when the agent's **BLS12-381** signature checks out on-chain (EIP-2537 precompiles) and the allocation stays inside hard guardrails.
 
 > Built for the Arbitrum Open House Singapore Online Buildathon (Robinhood Chain track).
+>
+> **Live:** dashboard https://pichifi-yieldy.vercel.app on Robinhood Chain testnet (vault [`0x6069…820f`](https://explorer.testnet.chain.robinhood.com/address/0x60690F414006008984801DBc550C1348B256820f), all contracts verified on Blockscout).
 
 ---
 
