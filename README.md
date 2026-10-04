@@ -126,6 +126,8 @@ cd agent && pnpm tsx scripts/e2e-demo.ts robinhood-testnet
 
 **No testnet ETH? Rehearse on a fork.** `INVESTOR_ADDRESS=0xYourWallet ./scripts/local-demo.sh` forks Robinhood testnet locally (its real v4 PoolManager and EIP-2537 precompiles). It deploys with the same script, starts the agent and serves the dashboard at http://localhost:3000. Add a MetaMask network with RPC `http://127.0.0.1:8545` and chain id 46630. Stop it with `./scripts/local-demo.sh stop`.
 
+**Hosted demo on a fork (no testnet ETH needed).** On a VPS prepared with `bootstrap-vps.sh <IP>.sslip.io`, run `FORK_URL=<archive RPC> VERCEL_URL=https://<app>.vercel.app AGENT_PUBLIC_URL=https://<IP>.sslip.io ./scripts/vps-demo.sh`. It forks Robinhood testnet, deploys, and runs the agent under pm2. The agent also serves the fork at `POST /rpc`, method-filtered (`anvil_*`/`evm_*` are blocked). Paste the printed `NEXT_PUBLIC_*` values into Vercel.
+
 **Production-style hosting.**
 - **Agent:** runs on a VPS. `sudo -E bash scripts/bootstrap-vps.sh agent.example.com` installs Docker, Node, pnpm, pm2, Foundry, Rust + cargo-stylus and Caddy (HTTPS, SSE-safe proxy). Then run `pm2 start deploy/ecosystem.config.cjs`.
 - **Dashboard:** deploys to Vercel with the root directory set to `frontend/`. Copy the `NEXT_PUBLIC_*` values from `frontend/.env.local`.

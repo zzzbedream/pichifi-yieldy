@@ -42,6 +42,7 @@ async function main(): Promise<void> {
     corsOrigin: config.CORS_ORIGIN,
     vaultAddress: config.VAULT_ADDRESS,
     chainId: config.CHAIN_ID,
+    rpcUpstream: config.FORK_RPC_PROXY_UPSTREAM,
   });
   await server.listen({ port: config.AGENT_PORT, host: '0.0.0.0' });
 

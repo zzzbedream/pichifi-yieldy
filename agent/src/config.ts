@@ -41,6 +41,8 @@ export const configSchema = z.object({
   TICK_SECONDS: z.coerce.number().int().min(5).default(20),
   INTENT_TTL_SECONDS: z.coerce.number().int().min(30).default(300),
   DATA_DIR: z.string().default('data'),
+  /** Hosted fork demo only: local anvil URL exposed (method-filtered) at POST /rpc. */
+  FORK_RPC_PROXY_UPSTREAM: optional(z.string().url()),
 });
 
 export type Config = z.infer<typeof configSchema>;

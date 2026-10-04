@@ -14,6 +14,7 @@ import { z } from 'zod';
 import { SCENARIO_IDS, SCENARIOS, isScenarioId, type ScenarioId } from '../market/scenarios.js';
 import type { DecisionRecord, DecisionStore } from '../store/decisions.js';
 import type { Trigger } from '../engine/engine.js';
+import { registerRpcProxy } from './rpcProxy.js';
 
 export interface ApiEngine {
   currentScenario(): ScenarioId;
@@ -30,6 +31,8 @@ export interface ApiDeps {
   corsOrigin: string;
   vaultAddress: string;
   chainId: number;
+  /** When set (hosted fork demo), exposes a method-filtered JSON-RPC proxy at POST /rpc. */
+  rpcUpstream?: string;
 }
 
 const scenarioBody = z.object({ scenario: z.string().refine(isScenarioId, 'unknown scenario') });
@@ -61,6 +64,8 @@ export async function buildServer(deps: ApiDeps): Promise<FastifyInstance> {
   });
 
   app.get('/health', async () => ({ ok: true }));
+
+  if (deps.rpcUpstream) registerRpcProxy(app, deps.rpcUpstream);
 
   app.get('/state', async () => ({
     signer: deps.signer,

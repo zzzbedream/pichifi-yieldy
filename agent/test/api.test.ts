@@ -124,3 +124,32 @@ describe('config', () => {
     expect(() => loadConfig({ ...base, AGENT_ECDSA_PRIVATE_KEY: '' })).toThrow(/AGENT_ECDSA_PRIVATE_KEY/);
   });
 });
+
+describe('fork RPC proxy', () => {
+  it('allows standard methods and blocks state-mutating debug methods', async () => {
+    const { firstDisallowedMethod } = await import('../src/api/rpcProxy.js');
+    expect(firstDisallowedMethod({ jsonrpc: '2.0', id: 1, method: 'eth_call' })).toBeNull();
+    expect(firstDisallowedMethod([{ method: 'eth_chainId' }, { method: 'eth_sendRawTransaction' }])).toBeNull();
+    expect(firstDisallowedMethod({ method: 'anvil_setBalance' })).toBe('anvil_setBalance');
+    expect(firstDisallowedMethod([{ method: 'eth_call' }, { method: 'evm_mine' }])).toBe('evm_mine');
+    expect(firstDisallowedMethod([])).toBe('invalid_batch');
+  });
+
+  it('returns 403 for blocked methods through the server', async () => {
+    const { buildServer } = await import('../src/api/server.js');
+    const { DecisionStore } = await import('../src/store/decisions.js');
+    const srv = await buildServer({
+      engine: { currentScenario: () => 'calm', setScenario: () => {}, trigger: async () => {} },
+      store: new DecisionStore(null),
+      signer: { scheme: 'bls', identity: 'x' },
+      demoToken: 'demo-token-0123456789',
+      corsOrigin: 'http://localhost:3000',
+      vaultAddress: '0x00000000000000000000000000000000000000aa',
+      chainId: 46630,
+      rpcUpstream: 'http://127.0.0.1:1',
+    });
+    const res = await srv.inject({ method: 'POST', url: '/rpc', headers: { 'content-type': 'application/json' }, payload: { jsonrpc: '2.0', id: 1, method: 'anvil_setBalance', params: [] } });
+    expect(res.statusCode).toBe(403);
+    await srv.close();
+  });
+});
