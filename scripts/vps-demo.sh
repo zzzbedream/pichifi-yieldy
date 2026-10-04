@@ -16,6 +16,9 @@ RPC=http://127.0.0.1:8545
 FORK_URL="${FORK_URL:-https://rpc.testnet.chain.robinhood.com}"
 VERCEL_URL="${VERCEL_URL:-}"
 set -a; source "$ROOT/.env"; set +a
+export PATH="$HOME/.foundry/bin:$PATH"
+ANVIL="$(command -v anvil || true)"
+[ -n "$ANVIL" ] || { echo "anvil not found: install Foundry (curl -L https://foundry.paradigm.xyz | bash && ~/.foundry/bin/foundryup)"; exit 1; }
 
 wait_http() { for _ in $(seq 1 60); do curl -s -m 2 "$1" >/dev/null 2>&1 && return 0; sleep 1; done; return 1; }
 
@@ -29,7 +32,7 @@ echo "==> (re)starting fork of $FORK_URL"
 # Make sure the pm2 daemon is up (a stale or half-started daemon fails with "God db process id unknown").
 pm2 ping >/dev/null 2>&1 || { pm2 kill >/dev/null 2>&1 || true; pm2 ping >/dev/null; }
 pm2 delete ayv-anvil ayv-agent >/dev/null 2>&1 || true
-pm2 start "$(command -v anvil)" --name ayv-anvil -- --fork-url "$FORK_URL" --hardfork prague --port 8545 --silent >/dev/null
+pm2 start "$ANVIL" --name ayv-anvil --interpreter none -- --fork-url "$FORK_URL" --hardfork prague --port 8545 --silent >/dev/null
 wait_http "$RPC" || { echo "anvil did not start (pm2 logs ayv-anvil)"; exit 1; }
 cast rpc evm_setNextBlockTimestamp "$(date +%s)" --rpc-url "$RPC" >/dev/null
 for key in "$DEPLOYER_PRIVATE_KEY" "$RELAYER_PRIVATE_KEY"; do
