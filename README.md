@@ -156,6 +156,7 @@ The phased orchestration passes the full E2E on a clean chain. `cargo stylus exp
 | Agent (policy determinism, signers, engine, API auth/HMAC) | `pnpm -C agent test` | 30 passing |
 | Dashboard formatters | `pnpm -C frontend exec vitest run` | 6 passing |
 | End-to-end on **live Robinhood testnet** (and on a fork) | `scripts/e2e-demo.ts` | 10/10 checks |
+| Live QA of every invariant on testnet: forged/foreign/tampered signatures, replay, expiry, guardrails, rate limit, RPC proxy filtering; with `--live`: guardian pause, redeem while paused, emergencyExit | `pnpm -C agent tsx scripts/qa-live.ts robinhood-testnet --live` | 25/25 checks |
 
 The BLS pipeline (hash-to-field off-chain, then `MAP_FP2_TO_G2` ×2 → `G2ADD` → `PAIRING_CHECK`) is also proven against the **live** Robinhood testnet precompiles by `agent/scripts/bls-vectors.ts`.
 
