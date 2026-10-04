@@ -7,6 +7,7 @@ module.exports = {
       cwd: __dirname + '/../agent',
       script: 'node_modules/.bin/tsx',
       args: 'src/main.ts',
+      interpreter: 'none', // .bin/tsx is a shell shim, not a JS file
       env: { NODE_ENV: 'production', DATA_DIR: 'data/robinhood-testnet' },
       autorestart: true,
       max_restarts: 20,

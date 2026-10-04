@@ -51,7 +51,7 @@ rm -rf "$ROOT/agent/data/vps-fork"
 CORS="http://localhost:3000${VERCEL_URL:+,$VERCEL_URL}"
 (cd "$ROOT/agent" && RPC_URL="$RPC" VAULT_ADDRESS="$VAULT" SIGNER_SCHEME=bls AMADEUS_ANCHOR_ENABLED=false \
   DATA_DIR=data/vps-fork TICK_SECONDS=10 CORS_ORIGIN="$CORS" FORK_RPC_PROXY_UPSTREAM="$RPC" \
-  pm2 start node_modules/.bin/tsx --name ayv-agent --update-env -- src/main.ts >/dev/null)
+  pm2 start node_modules/.bin/tsx --name ayv-agent --interpreter none --update-env -- src/main.ts >/dev/null)
 wait_http http://127.0.0.1:8787/health || { echo "agent did not start (pm2 logs ayv-agent)"; exit 1; }
 pm2 save >/dev/null
 
