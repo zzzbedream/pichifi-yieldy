@@ -8,7 +8,7 @@ Investors deposit **USDG**. An agent with an **Amadeus Protocol** identity reads
 
 The vault is written in **Rust for Arbitrum Stylus**. It only moves funds when the agent's **BLS12-381** signature checks out on-chain (EIP-2537 precompiles) and the allocation stays inside hard guardrails.
 
-> Built for the Arbitrum Open House Singapore Online Buildathon (Robinhood Chain track).
+> Built for the **Colosseum Crypto World's Fair** (Robinhood Chain track).
 >
 > **Live:** dashboard https://pichifi-yieldy.vercel.app on Robinhood Chain testnet (vault [`0x6069…820f`](https://explorer.testnet.chain.robinhood.com/address/0x60690F414006008984801DBc550C1348B256820f), all contracts verified on Blockscout).
 
@@ -156,7 +156,7 @@ The phased orchestration passes the full E2E on a clean chain. `cargo stylus exp
 | Rust/Stylus (share math, allocation planning, EIP-712 parity, BLS pipeline, access control) | `cargo test --workspace` | 54 passing |
 | Solidity (full system with real v4 PoolManager + Morpho Blue, BLS verifier) | `forge test` | 24 passing |
 | Agent (policy determinism, signers, engine, API auth/HMAC) | `pnpm -C agent test` | 30 passing |
-| Dashboard formatters | `pnpm -C frontend exec vitest run` | 6 passing |
+| Dashboard formatters and $PICHI token parsing | `pnpm -C frontend exec vitest run` | 10 passing |
 | End-to-end on **live Robinhood testnet** (and on a fork) | `scripts/e2e-demo.ts` | 10/10 checks |
 | Live QA of every invariant on testnet: forged/foreign/tampered signatures, replay, expiry, guardrails, rate limit, RPC proxy filtering; with `--live`: guardian pause, redeem while paused, emergencyExit | `pnpm -C agent tsx scripts/qa-live.ts robinhood-testnet --live` | 25/25 checks |
 

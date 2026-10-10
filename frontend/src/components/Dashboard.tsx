@@ -11,6 +11,7 @@ import { DecisionFeed } from './DecisionFeed';
 import { PositionPanel } from './PositionPanel';
 import { DemoControls } from './DemoControls';
 import { Footer } from './Footer';
+import { PichiPanel } from './PichiPanel';
 import ui from './ui.module.css';
 
 export function Dashboard() {
@@ -48,6 +49,7 @@ export function Dashboard() {
         <DecisionFeed decisions={agent.decisions} isAgentReachable={!agent.error} />
         <div className={ui.side}>
           <PositionPanel sharePrice={vault.sharePrice} />
+          <PichiPanel />
           {appConfig.demoMode && <DemoControls state={agent.state} onChanged={() => void agent.refetchState()} />}
         </div>
       </div>

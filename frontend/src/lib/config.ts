@@ -4,6 +4,10 @@ function addr(value: string | undefined): Address | undefined {
   return value && isAddress(value) ? (value as Address) : undefined;
 }
 
+function safeHttpsUrl(value: string | undefined): string | undefined {
+  return value && /^https:\/\/[^\s"'<>]+$/.test(value) ? value : undefined;
+}
+
 // NEXT_PUBLIC_* values are inlined at build time, so they must be referenced literally.
 export const appConfig = {
   chainId: Number(process.env.NEXT_PUBLIC_CHAIN_ID ?? 46630),
@@ -24,6 +28,10 @@ export const appConfig = {
     irm: addr(process.env.NEXT_PUBLIC_IRM_ADDRESS),
   },
   marketId: process.env.NEXT_PUBLIC_MARKET_ID as `0x${string}` | undefined,
+  pichi: {
+    token: addr(process.env.NEXT_PUBLIC_PICHI_TOKEN_ADDRESS),
+    launchUrl: safeHttpsUrl(process.env.NEXT_PUBLIC_PICHI_LAUNCH_URL),
+  },
 } as const;
 
 export const robinhoodTestnet = defineChain({

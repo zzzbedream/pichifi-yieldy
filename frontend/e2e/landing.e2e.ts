@@ -30,6 +30,14 @@ test('dashboard renders live vault data and the signed decision feed', async ({ 
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/${info.project.name}.png`, fullPage: true });
 });
 
+test('$PICHI panel shows live token data when configured', async ({ page }) => {
+  await page.goto('/');
+  const panel = page.locator('section[aria-labelledby="pichi-heading"]');
+  test.skip((await panel.count()) === 0, 'NEXT_PUBLIC_PICHI_TOKEN_ADDRESS not set on this deployment');
+  await expect(panel).toContainText(/Holders\s*\d/, { timeout: 30_000 });
+  await expect(panel).toContainText('No monetary value');
+});
+
 test('agent API and RPC are served from the dashboard domain', async ({ request }) => {
   const health = await request.get('/agent/health');
   expect(health.ok()).toBe(true);
