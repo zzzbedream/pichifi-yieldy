@@ -133,8 +133,9 @@ async function intentChecks(): Promise<void> {
 async function apiChecks(api: string): Promise<void> {
   const health = await fetch(`${api}/health`).then((r) => r.json()).catch(() => null);
   expect(health?.ok === true, `agent API reachable at ${api}`);
-  const scenario = await fetch(`${api}/scenario`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{"scenario":"recession"}' });
-  expect(scenario.status === 401, 'demo control requires the bearer token', `HTTP ${scenario.status}`);
+  // Side-effect free: an unknown scenario is refused whether stress tests are public (400) or token-only (401).
+  const scenario = await fetch(`${api}/scenario`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{"scenario":"moon"}' });
+  expect([400, 401].includes(scenario.status), 'scenario control rejects unknown scenarios', `HTTP ${scenario.status}`);
   const rpc = (body: string) => fetch(`${api}/rpc`, { method: 'POST', headers: { 'content-type': 'application/json' }, body });
   const chainIdRes = await rpc('{"jsonrpc":"2.0","id":1,"method":"eth_chainId"}').then((r) => r.json()).catch(() => null);
   expect(chainIdRes?.result === toHex(chainId), 'public RPC proxy serves the right chain', chainIdRes?.result);
