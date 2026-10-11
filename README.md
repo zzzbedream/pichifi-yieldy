@@ -111,6 +111,10 @@ Explorer: https://explorer.testnet.chain.robinhood.com. Full list in [`deploymen
 
 Morpho market id: `0x16b03529a2b45adaf096bae7cb573120bb0fdf60a0550dce0830b79894e9291a`. Uniswap v4 pool id: `0xb3205e2102b7b4baa5901d0f724d66c5c97758f7059889be536b06f9fcdd7763`.
 
+**Amadeus mainnet anchoring.** Every executed intent is anchored on Amadeus mainnet as a soulbound NFT in the agent's `AYVINTENTS` collection, signed by the same key the vault verifies. First anchor: [`5tkH5Cwp…nWMD`](https://explorer.ama.one/tx/5tkH5CwpszndcvFZi3ABW6WLNfHt87XoFuiQm338nWMD) (about 0.0005 AMA per anchor).
+
+**$PICHI on vibe/vibe.** The project's community token [`PICHI`](https://testnet.vibevibe.fun/token/0x0eE3B8218D8007A2B2B91fBb25c70D9614c021cF) is launched on the vibe/vibe testnet launchpad (Robinhood Chain testnet, token `0x0eE3…021cF`). The dashboard shows its holders and transfers live. Testnet only, no monetary value.
+
 ## Run it
 
 ```bash
