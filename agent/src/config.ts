@@ -49,7 +49,7 @@ export const configSchema = z.object({
   DRIP_AMOUNT_WEI: z.coerce.bigint().default(300_000_000_000_000n),
   DRIP_BUDGET_WEI: z.coerce.bigint().default(3_000_000_000_000_000n),
   DRIP_MIN_INTERVAL_SECONDS: z.coerce.number().int().min(5).default(20),
-  STRESS_COOLDOWN_SECONDS: z.coerce.number().int().min(30).default(120),
+  STRESS_COOLDOWN_SECONDS: z.coerce.number().int().min(30).default(30),
   STRESS_REVERT_SECONDS: z.coerce.number().int().min(60).default(180),
   /** Public stress tests pause below this relayer balance (wei). Default 0.0003 ETH. */
   RELAYER_MIN_BALANCE_WEI: z.coerce.bigint().default(300_000_000_000_000n),

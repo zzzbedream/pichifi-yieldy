@@ -78,6 +78,13 @@ async function getJson<T>(path: string): Promise<T> {
 export const fetchAgentState = () => getJson<AgentState>('/state');
 export const fetchDecisions = () => getJson<{ decisions: DecisionRecord[] }>('/decisions');
 
+/** Another stress test just ran; the switch can be retried after `retryAfterSeconds`. */
+export class ScenarioBusyError extends Error {
+  constructor(readonly retryAfterSeconds: number) {
+    super(`Busy for ${retryAfterSeconds}s`);
+  }
+}
+
 /**
  * Switches the agent's market scenario. Without a token this is a public stress test (global
  * cooldown, automatic return to live inputs); the presenter token bypasses the cooldown.
@@ -89,7 +96,8 @@ export async function postScenario(scenario: ScenarioId, token?: string): Promis
     headers: { 'content-type': 'application/json', ...(token ? { authorization: `Bearer ${token}` } : {}) },
     body: JSON.stringify({ scenario }),
   });
-  const body = (await res.json().catch(() => ({}))) as { error?: unknown; revertsAt?: unknown };
+  const body = (await res.json().catch(() => ({}))) as { error?: unknown; revertsAt?: unknown; retryAfter?: unknown };
+  if (res.status === 429) throw new ScenarioBusyError(Number(body.retryAfter) > 0 ? Number(body.retryAfter) : 30);
   if (res.status === 401) throw new Error('Stress tests need the presenter token on this deployment.');
   if (!res.ok) throw new Error(typeof body.error === 'string' ? body.error : `Scenario switch failed (${res.status})`);
   return { revertsAt: typeof body.revertsAt === 'string' ? body.revertsAt : null };
