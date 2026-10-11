@@ -10,7 +10,7 @@ The vault is written in **Rust for Arbitrum Stylus**. It only moves funds when t
 
 > Built for the **Colosseum Crypto World's Fair** (Robinhood Chain track).
 >
-> **Live:** dashboard https://pichifi-yieldy.vercel.app on Robinhood Chain testnet (vault [`0x6069…820f`](https://explorer.testnet.chain.robinhood.com/address/0x60690F414006008984801DBc550C1348B256820f), all contracts verified on Blockscout).
+> **Live:** dashboard https://pichifi-yieldy.vercel.app on Robinhood Chain testnet (vault [`0x584C…BeEE`](https://explorer.testnet.chain.robinhood.com/address/0x584C8e5a64f170f30a7Ff668768f74a8df94BeEE), all contracts verified on Blockscout).
 
 ---
 
@@ -98,18 +98,18 @@ Explorer: https://explorer.testnet.chain.robinhood.com. Full list in [`deploymen
 
 | Contract | Address |
 |---|---|
-| AgenticVault (Solidity build) | [`0x60690F414006008984801DBc550C1348B256820f`](https://explorer.testnet.chain.robinhood.com/address/0x60690F414006008984801DBc550C1348B256820f) |
-| AmadeusBlsVerifier | [`0x7Cf497746E6CB0e8314134EDd42d66b609960c80`](https://explorer.testnet.chain.robinhood.com/address/0x7Cf497746E6CB0e8314134EDd42d66b609960c80) |
-| FeeEngine | [`0xf94e41b1D4e13AC2d44DF554b829FE6994101a1d`](https://explorer.testnet.chain.robinhood.com/address/0xf94e41b1D4e13AC2d44DF554b829FE6994101a1d) |
-| DynamicFeeHook | [`0x504B1453c6Fefe585D9Bf8fCf092aBb074Cce080`](https://explorer.testnet.chain.robinhood.com/address/0x504B1453c6Fefe585D9Bf8fCf092aBb074Cce080) |
-| UniV4LiquidityAdapter | [`0x333a96748260e55342baA06d4e633757093EFBC4`](https://explorer.testnet.chain.robinhood.com/address/0x333a96748260e55342baA06d4e633757093EFBC4) |
-| Morpho Blue | [`0x29977b23d3614EaF0FE221a1d1615b07a6b263C6`](https://explorer.testnet.chain.robinhood.com/address/0x29977b23d3614EaF0FE221a1d1615b07a6b263C6) |
-| Test USDG | [`0xF11879E4384E1F0291e40D8A10262785e812884D`](https://explorer.testnet.chain.robinhood.com/address/0xF11879E4384E1F0291e40D8A10262785e812884D) |
-| rhNVDA (test Stock Token) | [`0x44709536c479f8455641421BE8C04eEb66C85F86`](https://explorer.testnet.chain.robinhood.com/address/0x44709536c479f8455641421BE8C04eEb66C85F86) |
-| StockPriceOracle | [`0x9A37a331Bf8047cb505dB0EE39F5F416Ab2C4F42`](https://explorer.testnet.chain.robinhood.com/address/0x9A37a331Bf8047cb505dB0EE39F5F416Ab2C4F42) |
+| AgenticVault (Solidity build) | [`0x584C8e5a64f170f30a7Ff668768f74a8df94BeEE`](https://explorer.testnet.chain.robinhood.com/address/0x584C8e5a64f170f30a7Ff668768f74a8df94BeEE) |
+| AmadeusBlsVerifier | [`0x24E277C0A5a83296072B577b8B87C7ae5d63cD53`](https://explorer.testnet.chain.robinhood.com/address/0x24E277C0A5a83296072B577b8B87C7ae5d63cD53) |
+| FeeEngine | [`0x5A4e9a436FeFFeC02E00d1aC680D25B362Ea43DC`](https://explorer.testnet.chain.robinhood.com/address/0x5A4e9a436FeFFeC02E00d1aC680D25B362Ea43DC) |
+| DynamicFeeHook | [`0x1f3E74aB85Ef912aaf8E0FFee166AA100CdfE080`](https://explorer.testnet.chain.robinhood.com/address/0x1f3E74aB85Ef912aaf8E0FFee166AA100CdfE080) |
+| UniV4LiquidityAdapter | [`0x6104D27f2713fA51A49A5949fBd67A26c54EC5e5`](https://explorer.testnet.chain.robinhood.com/address/0x6104D27f2713fA51A49A5949fBd67A26c54EC5e5) |
+| Morpho Blue | [`0x9dDe22408c73342519C9388391f47EFD479A4fAb`](https://explorer.testnet.chain.robinhood.com/address/0x9dDe22408c73342519C9388391f47EFD479A4fAb) |
+| Test USDG | [`0x0D7e0bF96Ed8ee7E7065534B4cDa85cB5Bf7A619`](https://explorer.testnet.chain.robinhood.com/address/0x0D7e0bF96Ed8ee7E7065534B4cDa85cB5Bf7A619) |
+| rhNVDA (test Stock Token) | [`0x098b748E869b242069D9d251eE246B4439B1389E`](https://explorer.testnet.chain.robinhood.com/address/0x098b748E869b242069D9d251eE246B4439B1389E) |
+| StockPriceOracle | [`0x150a26838483fe705bb9A8589b398A5E8ee52DA8`](https://explorer.testnet.chain.robinhood.com/address/0x150a26838483fe705bb9A8589b398A5E8ee52DA8) |
 | Uniswap v4 PoolManager (Robinhood) | [`0x8366a39CC670B4001A1121B8F6A443A643e40951`](https://explorer.testnet.chain.robinhood.com/address/0x8366a39CC670B4001A1121B8F6A443A643e40951) |
 
-Morpho market id: `0x16b03529a2b45adaf096bae7cb573120bb0fdf60a0550dce0830b79894e9291a`. Uniswap v4 pool id: `0xb3205e2102b7b4baa5901d0f724d66c5c97758f7059889be536b06f9fcdd7763`.
+Morpho market id: `0x2eb88c100d916ec504044e13ebb0cf5743e267ba1e0927be35daba47cb542569`. Uniswap v4 pool id: `0x845e92780428326d446586309f3b3090c9474c6675b1239622bf31feb4f496fe`. A first vault (`0x60690F41…820f`) ran the live E2E and the guardian QA (pause, emergency exit); this fresh vault is the public demo.
 
 **Amadeus mainnet anchoring.** Every executed intent is anchored on Amadeus mainnet as a soulbound NFT in the agent's `AYVINTENTS` collection, signed by the same key the vault verifies. First anchor: [`5tkH5Cwp…nWMD`](https://explorer.ama.one/tx/5tkH5CwpszndcvFZi3ABW6WLNfHt87XoFuiQm338nWMD) (about 0.0005 AMA per anchor).
 

@@ -1,8 +1,7 @@
 /** Landing copy. Every claim here must match the README "real vs simulated" table. */
 
 export const REPO_URL = 'https://github.com/zzzbedream/pichifi-yieldy';
-export const VAULT_EXPLORER_URL =
-  'https://explorer.testnet.chain.robinhood.com/address/0x60690F414006008984801DBc550C1348B256820f';
+export const VAULT_EXPLORER_URL = `https://explorer.testnet.chain.robinhood.com/address/${process.env.NEXT_PUBLIC_VAULT_ADDRESS ?? ''}`;
 export const FIRST_ANCHOR_URL = 'https://explorer.ama.one/tx/5tkH5CwpszndcvFZi3ABW6WLNfHt87XoFuiQm338nWMD';
 
 export const PILLARS = [
