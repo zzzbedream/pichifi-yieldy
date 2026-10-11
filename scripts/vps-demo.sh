@@ -29,8 +29,8 @@ if [ "${1:-}" = "--fund" ]; then
 fi
 
 echo "==> (re)starting fork of $FORK_URL"
-# Make sure the pm2 daemon is up (a stale or half-started daemon fails with "God db process id unknown").
-pm2 ping >/dev/null 2>&1 || { pm2 kill >/dev/null 2>&1 || true; pm2 ping >/dev/null; }
+# The VPS is shared with other apps: only ever touch our own pm2 processes (ayv-*).
+pm2 ping >/dev/null 2>&1 || { echo "pm2 daemon not responding: check it manually (never pm2 kill: the VPS is shared)"; exit 1; }
 pm2 delete ayv-anvil ayv-agent >/dev/null 2>&1 || true
 pm2 start "$ANVIL" --name ayv-anvil --interpreter none -- --fork-url "$FORK_URL" --hardfork prague --port 8545 --silent >/dev/null
 wait_http "$RPC" || { echo "anvil did not start (pm2 logs ayv-anvil)"; exit 1; }

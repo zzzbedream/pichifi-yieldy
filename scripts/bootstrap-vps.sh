@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
-# One-time setup of an Ubuntu 22.04/24.04 VPS for Agentic Yield Vaults:
+# One-time setup of a DEDICATED Ubuntu 22.04/24.04 VPS for Agentic Yield Vaults.
+# WARNING: overwrites /etc/caddy/Caddyfile and enables ufw (22/80/443 only). Do NOT run it
+# on a VPS shared with other apps: add the site block from deploy/Caddyfile by hand instead.
+#
 # Docker (Stylus reproducible builds + nitro-devnode), Node 22 + pnpm + pm2, Foundry,
 # Rust 1.91 + wasm32 + cargo-stylus 0.10.10, Caddy (HTTPS for the agent API).
 # Usage: sudo -E bash scripts/bootstrap-vps.sh <agent-domain>   (e.g. 147-93-178-184.sslip.io)
