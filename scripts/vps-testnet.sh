@@ -27,7 +27,7 @@ for p in ayv-anvil ayv-agent; do pm2 delete "$p" >/dev/null 2>&1 || true; done  
 
 CORS="http://localhost:3000${VERCEL_URL:+,$VERCEL_URL}"
 (cd "$ROOT/agent" && RPC_URL="$RPC" VAULT_ADDRESS="$VAULT" SIGNER_SCHEME=bls \
-  AMADEUS_ANCHOR_ENABLED="$ANCHOR_ENABLED" AMADEUS_NETWORK="$ANCHOR_NETWORK" \
+  AMADEUS_ANCHOR_ENABLED="$ANCHOR_ENABLED" AMADEUS_NETWORK="$ANCHOR_NETWORK" MARKET_MODE="${MARKET_MODE:-live}" \
   DATA_DIR="data/$NETWORK" TICK_SECONDS=30 CORS_ORIGIN="$CORS" FORK_RPC_PROXY_UPSTREAM="$RPC" \
   pm2 start node_modules/.bin/tsx --name ayv-agent --interpreter none --update-env -- src/main.ts >/dev/null)
 wait_http http://127.0.0.1:8787/health || { echo "agent did not start (pm2 logs ayv-agent)"; exit 1; }

@@ -23,7 +23,8 @@ export function DemoControls({ state, onChanged }: DemoControlsProps) {
   const [busy, setBusy] = useState<ScenarioId | null>(null);
   const [error, setError] = useState<string | null>(null);
   const active = state?.scenario;
-  const inputs = state?.scenarios.find((s) => s.scenario === active);
+  const inputs = state?.inputs ?? state?.scenarios.find((s) => s.scenario === active);
+  const isLive = active === 'live';
 
   async function choose(scenario: ScenarioId) {
     setBusy(scenario);
@@ -74,7 +75,14 @@ export function DemoControls({ state, onChanged }: DemoControlsProps) {
       ) : (
         <p className={ui.notice}>Waiting for the agent…</p>
       )}
-      <p className={ui.notice}>Simulated scenario feed (testnet). Production swaps in Chainlink stock feeds and macro data.</p>
+      {isLive ? (
+        <p className={ui.notice}>
+          Live inputs{inputs ? ` (as of ${inputs.asOf.slice(0, 10)})` : ''}: Yahoo Finance daily closes, Finnhub earnings calendar, FRED
+          recession probability. Implied vol uses realized vol as a proxy. The other buttons are stress tests.
+        </p>
+      ) : (
+        <p className={ui.notice}>Stress-test scenario (simulated). Switch back to Live market for real inputs.</p>
+      )}
 
       <div className={ui.field} style={{ marginTop: 'var(--space-4)' }}>
         <label className="eyebrow" htmlFor="demo-token">

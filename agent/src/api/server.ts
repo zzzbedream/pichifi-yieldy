@@ -11,13 +11,15 @@ import Fastify, { type FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { z } from 'zod';
-import { SCENARIO_IDS, SCENARIOS, isScenarioId, type ScenarioId } from '../market/scenarios.js';
+import { SCENARIO_IDS, SCENARIOS, isScenarioId, type MarketInputs, type ScenarioId } from '../market/scenarios.js';
 import type { DecisionRecord, DecisionStore } from '../store/decisions.js';
 import type { Trigger } from '../engine/engine.js';
 import { registerRpcProxy } from './rpcProxy.js';
 
 export interface ApiEngine {
   currentScenario(): ScenarioId;
+  /** Inputs of the active scenario (live snapshot or stress test); null while loading. */
+  currentInputs?(): MarketInputs | null;
   setScenario(scenario: ScenarioId): void;
   trigger(reason: Trigger): Promise<void>;
 }
@@ -70,6 +72,7 @@ export async function buildServer(deps: ApiDeps): Promise<FastifyInstance> {
   app.get('/state', async () => ({
     signer: deps.signer,
     scenario: deps.engine.currentScenario(),
+    inputs: deps.engine.currentInputs?.() ?? null,
     scenarios: SCENARIO_IDS.map((id) => SCENARIOS[id]),
     vault: deps.vaultAddress,
     chainId: deps.chainId,

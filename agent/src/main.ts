@@ -9,6 +9,7 @@ import { DecisionStore } from './store/decisions.js';
 import { AgentEngine } from './engine/engine.js';
 import { buildServer } from './api/server.js';
 import { watchVaultFlows } from './indexer/depositWatcher.js';
+import { startLiveFeed, type LiveFeed } from './market/live.js';
 
 // Repo-root .env; variables already set in the process environment take precedence.
 loadEnv({ path: resolve(import.meta.dirname, '../../.env'), quiet: true });
@@ -23,6 +24,7 @@ async function main(): Promise<void> {
       : noopAnchorer;
   const vault = createVaultClient(config);
   const store = new DecisionStore(config.DATA_DIR);
+  let live: LiveFeed | null = null;
   const engine = new AgentEngine({
     vault,
     signer,
@@ -31,7 +33,20 @@ async function main(): Promise<void> {
     log: logger,
     explorerUrl: config.EXPLORER_URL,
     intentTtlSeconds: config.INTENT_TTL_SECONDS,
+    liveInputs: () => live?.latest() ?? null,
+    initialScenario: config.MARKET_MODE === 'live' ? 'live' : 'calm',
   });
+  if (config.MARKET_MODE === 'live') {
+    live = startLiveFeed({
+      symbol: config.MARKET_SYMBOL,
+      finnhubKey: config.FINNHUB_API_KEY,
+      refreshSeconds: config.LIVE_REFRESH_SECONDS,
+      log: logger,
+      onUpdate: () => {
+        if (engine.currentScenario() === 'live') void engine.trigger('timer');
+      },
+    });
+  }
 
   const server = await buildServer({
     engine,

@@ -18,6 +18,8 @@ export function Landing() {
           <a href="#problem">Problem</a>
           <a href="#how">How it works</a>
           <a href="#proof">Proof</a>
+          <a href="#business">Business</a>
+          <a href="#try">Try it</a>
           <a href="#roadmap">Roadmap</a>
           <Link href="/app" className={l.cta}>
             Launch app →

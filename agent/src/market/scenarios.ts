@@ -24,9 +24,11 @@ export interface MarketInputs {
   recessionProbBps: number;
 }
 
-export type ScenarioId = 'calm' | 'earnings_volatility' | 'recession';
+export type CuratedScenarioId = 'calm' | 'earnings_volatility' | 'recession';
+/** 'live' = snapshots from real market data (src/market/live.ts); the others are stress tests. */
+export type ScenarioId = CuratedScenarioId | 'live';
 
-export const SCENARIOS: Readonly<Record<ScenarioId, MarketInputs>> = Object.freeze({
+export const SCENARIOS: Readonly<Record<CuratedScenarioId, MarketInputs>> = Object.freeze({
   calm: {
     scenario: 'calm',
     asOf: '2026-10-02T20:00:00Z',
@@ -62,8 +64,8 @@ export const SCENARIOS: Readonly<Record<ScenarioId, MarketInputs>> = Object.free
   },
 });
 
-export const SCENARIO_IDS = Object.keys(SCENARIOS) as ScenarioId[];
+export const SCENARIO_IDS = Object.keys(SCENARIOS) as CuratedScenarioId[];
 
 export function isScenarioId(value: unknown): value is ScenarioId {
-  return typeof value === 'string' && (SCENARIO_IDS as string[]).includes(value);
+  return typeof value === 'string' && (value === 'live' || (SCENARIO_IDS as string[]).includes(value));
 }

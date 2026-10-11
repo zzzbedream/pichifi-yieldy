@@ -2,7 +2,7 @@
 import { appConfig } from './config';
 
 export type Regime = 0 | 1 | 2;
-export type ScenarioId = 'calm' | 'earnings_volatility' | 'recession';
+export type ScenarioId = 'live' | 'calm' | 'earnings_volatility' | 'recession';
 
 export interface MarketInputs {
   scenario: ScenarioId;
@@ -43,6 +43,8 @@ export interface AgentState {
   signer: { scheme: 'bls' | 'ecdsa'; identity: string };
   scenario: ScenarioId;
   scenarios: MarketInputs[];
+  /** Inputs of the active scenario (live snapshot or stress test). */
+  inputs?: MarketInputs | null;
   vault: string;
   chainId: number;
   latest: DecisionRecord | null;
@@ -52,6 +54,7 @@ export const REGIME_LABEL: Record<Regime, string> = { 0: 'Risk on', 1: 'Volatile
 export const REGIME_KEY: Record<Regime, 'on' | 'volatile' | 'off'> = { 0: 'on', 1: 'volatile', 2: 'off' };
 
 export const SCENARIO_LABEL: Record<ScenarioId, string> = {
+  live: 'Live market',
   calm: 'Calm market',
   earnings_volatility: 'Earnings week',
   recession: 'Recession signal',

@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { GUARANTEES, HONESTY, PROOF, REGIMES, REPO_URL, ROADMAP, STEPS } from './content';
+import { BUSINESS, GUARANTEES, HONESTY, PROOF, REGIMES, REPO_URL, ROADMAP, STEPS } from './content';
+import { TryIt } from './TryIt';
 import l from './landing.module.css';
 
 const REGIME_CLASS = { on: l.r_on, volatile: l.r_volatile, off: l.r_off } as const;
@@ -78,6 +79,38 @@ export function LandingSections() {
             </a>
           ))}
         </div>
+      </section>
+
+      <section id="business" className={l.section} aria-labelledby="business-title">
+        <div className={l.sectionHead}>
+          <div>
+            <span className="eyebrow">Business model</span>
+            <h2 id="business-title">We earn when the agent beats plain lending.</h2>
+          </div>
+          <p>
+            USDG holders on Robinhood Chain already earn about 7% lending through Robinhood Earn on Morpho. PICHIFI charges
+            for the excess, so incentives stay aligned with depositors.
+          </p>
+        </div>
+        <div className={l.proof}>
+          {BUSINESS.map((b) => (
+            <div key={b.figure} className={l.proofItem}>
+              <strong>{b.figure}</strong>
+              <span>{b.label}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section id="try" className={l.section} aria-labelledby="try-title">
+        <div className={l.sectionHead}>
+          <div>
+            <span className="eyebrow">Try it in 60 seconds</span>
+            <h2 id="try-title">Deposit on testnet and watch the agent work.</h2>
+          </div>
+          <p>Everything is free test money on Robinhood Chain testnet. No sign-up.</p>
+        </div>
+        <TryIt />
       </section>
 
       <section id="roadmap" className={l.section} aria-labelledby="roadmap-title">

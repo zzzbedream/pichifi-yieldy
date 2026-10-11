@@ -83,6 +83,7 @@ export const ROADMAP = [
       'On-chain BLS verification of every agent decision',
       'Dynamic-fee Uniswap v4 hook + Morpho Blue safe harbour',
       'Decisions anchored on Amadeus mainnet',
+      'Live market inputs: NVDA price, volatility, earnings calendar, recession probability',
       '$PICHI community token on vibe/vibe testnet',
     ],
   },
@@ -91,7 +92,7 @@ export const ROADMAP = [
     status: 'building',
     items: [
       'Switch the live vault to the canonical Rust/Stylus build when activations resume',
-      'Live market data: stock price feeds, implied volatility, macro signals',
+      'On-chain price oracles and a real implied-volatility feed',
       'External security audit',
     ],
   },
@@ -107,6 +108,14 @@ export const ROADMAP = [
 ] as const;
 
 export const HONESTY = {
-  real: 'Real: on-chain BLS12-381 verification, Robinhood’s Uniswap v4 PoolManager with our hook, Morpho Blue, guardrails, Amadeus mainnet anchoring.',
-  simulated: 'Simulated on testnet: market scenarios, the rhNVDA test stock and its oracle, test USDG. Not audited; testnet tokens have no monetary value.',
+  real: 'Real: live market inputs (Yahoo Finance, Finnhub, FRED), on-chain BLS12-381 verification, Robinhood’s Uniswap v4 PoolManager with our hook, Morpho Blue, guardrails, Amadeus mainnet anchoring.',
+  simulated: 'Simulated on testnet: the rhNVDA test stock and its oracle, test USDG, optional stress-test scenarios; implied vol uses realized vol as a proxy. Not audited; testnet tokens have no monetary value.',
 } as const;
+
+export const BUSINESS = [
+  { figure: '0.5%', label: 'annual management fee on assets under management' },
+  { figure: '10%', label: 'performance fee, only on returns above the Robinhood Earn benchmark (~7% APY), with a high-water mark' },
+  { figure: '0%', label: 'deposit or withdrawal fees: investors only pay when the agent beats lending' },
+] as const;
+
+export const FAUCET_URL = 'https://faucet.testnet.chain.robinhood.com/';

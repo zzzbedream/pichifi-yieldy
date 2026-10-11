@@ -398,7 +398,7 @@
 /* proof */
 .proof {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   border: 1px solid var(--rule-strong);
 }
 
@@ -561,5 +561,15 @@
   .proofItem + .proofItem {
     border-left: 0;
     border-top: 1px solid var(--rule);
+  }
+}
+
+.steps3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 760px) {
+  .steps3 {
+    grid-template-columns: 1fr;
   }
 }

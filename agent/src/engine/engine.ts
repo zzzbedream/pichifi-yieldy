@@ -6,7 +6,7 @@
 import type { Hex } from 'viem';
 import { decide, type Decision } from '../policy/policy.js';
 import { intentDigest, type RebalanceIntent } from '../intent/eip712.js';
-import { SCENARIOS, type ScenarioId } from '../market/scenarios.js';
+import { SCENARIOS, type MarketInputs, type ScenarioId } from '../market/scenarios.js';
 import type { IntentSigner } from '../signing/signer.js';
 import type { Anchorer } from '../amadeus/anchor.js';
 import type { VaultClient, VaultSnapshot } from '../chain/vaultClient.js';
@@ -24,6 +24,9 @@ export interface EngineDeps {
   log: Logger;
   explorerUrl: string;
   intentTtlSeconds: number;
+  /** Source of live snapshots for the 'live' scenario. */
+  liveInputs?: () => MarketInputs | null;
+  initialScenario?: ScenarioId;
 }
 
 export type Trigger = 'timer' | 'scenario' | 'deposit' | 'manual' | 'webhook';
@@ -48,12 +51,19 @@ export function secondsUntilAllowed(snapshot: VaultSnapshot, now: bigint): numbe
 }
 
 export class AgentEngine {
-  private scenario: ScenarioId = 'calm';
+  private scenario: ScenarioId;
   private running = false;
   private pending: Trigger | null = null;
   private retryTimer: NodeJS.Timeout | null = null;
 
-  constructor(private readonly deps: EngineDeps) {}
+  constructor(private readonly deps: EngineDeps) {
+    this.scenario = deps.initialScenario ?? 'calm';
+  }
+
+  /** Inputs for the active scenario; null while no live snapshot is available yet. */
+  currentInputs(): MarketInputs | null {
+    return this.scenario === 'live' ? (this.deps.liveInputs?.() ?? null) : SCENARIOS[this.scenario];
+  }
 
   currentScenario(): ScenarioId {
     return this.scenario;
@@ -101,7 +111,11 @@ export class AgentEngine {
   private async run(reason: Trigger): Promise<void> {
     const { vault, signer, anchorer, store, log } = this.deps;
     const snapshot = await vault.snapshot();
-    const inputs = SCENARIOS[this.scenario];
+    const inputs = this.currentInputs();
+    if (!inputs) {
+      log.info('no live market snapshot yet; skipping');
+      return;
+    }
     const decision = decide(inputs);
     if (!needsRebalance(snapshot, decision)) return;
 
@@ -135,7 +149,7 @@ export class AgentEngine {
       this.scheduleRetry(5);
       return;
     }
-    let record = store.upsert(this.baseRecord(reason, decision, intent, digest, signed.proof));
+    let record = store.upsert(this.baseRecord(reason, inputs, decision, intent, digest, signed.proof));
     if (!preflight.ok) {
       store.upsert({ ...record, status: 'failed', error: `${preflight.errorName}: ${preflight.message}` });
       return;
@@ -163,13 +177,13 @@ export class AgentEngine {
     if (anchor) store.upsert({ ...record, amadeus: anchor });
   }
 
-  private baseRecord(trigger: Trigger, decision: Decision, intent: RebalanceIntent, digest: Hex, proof: Hex): DecisionRecord {
+  private baseRecord(trigger: Trigger, inputs: MarketInputs, decision: Decision, intent: RebalanceIntent, digest: Hex, proof: Hex): DecisionRecord {
     return {
       id: `${intent.nonce.toString()}-${digest.slice(2, 10)}`,
       createdAt: new Date().toISOString(),
       trigger,
       scenario: this.scenario,
-      inputs: SCENARIOS[this.scenario],
+      inputs,
       decision,
       intent: { nonce: intent.nonce.toString(), deadline: intent.deadline.toString(), digest },
       signer: { scheme: this.deps.signer.scheme, identity: this.deps.signer.identity, proof },
