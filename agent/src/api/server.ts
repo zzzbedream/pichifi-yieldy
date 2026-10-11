@@ -128,9 +128,7 @@ export async function buildServer(deps: ApiDeps): Promise<FastifyInstance> {
     const scenario = parsed.data.scenario as ScenarioId;
 
     if (!isPresenter && pub) {
-      if (!(await pub.canSpend())) {
-        return reply.code(503).send({ error: 'Public stress tests are paused: the relayer is low on test gas.' });
-      }
+      // Cheap cooldown first, so floods of requests never reach the RPC balance check.
       const gate = pub.gate.check(Date.now());
       if (!gate.ok) {
         reply.header('retry-after', String(gate.retryAfterSeconds));
@@ -139,6 +137,9 @@ export async function buildServer(deps: ApiDeps): Promise<FastifyInstance> {
           .send({ error: `Someone just ran a stress test. Try again in ${gate.retryAfterSeconds}s.`, retryAfter: gate.retryAfterSeconds });
       }
       pub.gate.record(Date.now());
+      if (!(await pub.canSpend())) {
+        return reply.code(503).send({ error: 'Public stress tests are paused: the relayer is low on test gas.' });
+      }
     }
 
     deps.engine.setScenario(scenario);
