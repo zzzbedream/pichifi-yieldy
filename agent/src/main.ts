@@ -10,6 +10,8 @@ import { AgentEngine } from './engine/engine.js';
 import { buildServer } from './api/server.js';
 import { watchVaultFlows } from './indexer/depositWatcher.js';
 import { startLiveFeed, type LiveFeed } from './market/live.js';
+import { StressGate, type PublicStress } from './api/stressGate.js';
+import { privateKeyToAccount } from 'viem/accounts';
 
 // Repo-root .env; variables already set in the process environment take precedence.
 loadEnv({ path: resolve(import.meta.dirname, '../../.env'), quiet: true });
@@ -48,6 +50,24 @@ async function main(): Promise<void> {
     });
   }
 
+  const relayer = privateKeyToAccount(config.RELAYER_PRIVATE_KEY).address;
+  const publicStress: PublicStress | undefined =
+    config.PUBLIC_STRESS_TEST && config.MARKET_MODE === 'live'
+      ? {
+          gate: new StressGate({ cooldownMs: config.STRESS_COOLDOWN_SECONDS * 1000 }),
+          revertTo: 'live',
+          revertMs: config.STRESS_REVERT_SECONDS * 1000,
+          canSpend: async () => {
+            try {
+              return (await vault.publicClient.getBalance({ address: relayer })) >= config.RELAYER_MIN_BALANCE_WEI;
+            } catch (err) {
+              logger.warn({ err }, 'relayer balance check failed');
+              return false;
+            }
+          },
+        }
+      : undefined;
+
   const server = await buildServer({
     engine,
     store,
@@ -58,6 +78,7 @@ async function main(): Promise<void> {
     vaultAddress: config.VAULT_ADDRESS,
     chainId: config.CHAIN_ID,
     rpcUpstream: config.FORK_RPC_PROXY_UPSTREAM,
+    publicStress,
   });
   await server.listen({ port: config.AGENT_PORT, host: '0.0.0.0' });
 

@@ -22,6 +22,7 @@ export function DemoControls({ state, onChanged }: DemoControlsProps) {
   const [token, setToken] = useState(readToken);
   const [busy, setBusy] = useState<ScenarioId | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [revertsAt, setRevertsAt] = useState<string | null>(null);
   const active = state?.scenario;
   const inputs = state?.inputs ?? state?.scenarios.find((s) => s.scenario === active);
   const isLive = active === 'live';
@@ -35,7 +36,8 @@ export function DemoControls({ state, onChanged }: DemoControlsProps) {
       // storage unavailable (private mode) — token stays in memory only
     }
     try {
-      await postScenario(scenario, token);
+      const result = await postScenario(scenario, token || undefined);
+      setRevertsAt(result.revertsAt);
       onChanged();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Scenario switch failed');
@@ -84,29 +86,46 @@ export function DemoControls({ state, onChanged }: DemoControlsProps) {
         <p className={ui.notice}>Stress-test scenario (simulated). Switch back to Live market for real inputs.</p>
       )}
 
-      <div className={ui.field} style={{ marginTop: 'var(--space-4)' }}>
-        <label className="eyebrow" htmlFor="demo-token">
-          Presenter token
-        </label>
-        <div className={ui.inputRow}>
-          <input id="demo-token" type="password" value={token} onChange={(e) => setToken(e.target.value)} placeholder="DEMO_API_TOKEN" />
-        </div>
-      </div>
+      <p className="eyebrow" style={{ marginTop: 'var(--space-4)' }}>
+        Stress-test the agent — anyone can try
+      </p>
+      <p className={ui.notice}>
+        Each switch triggers a real, BLS-verified rebalance on Robinhood testnet. The vault returns to live market inputs
+        automatically after a few minutes; one stress test at a time.
+      </p>
       <div className={ui.scenarios}>
         {(Object.keys(SCENARIO_LABEL) as ScenarioId[]).map((id) => (
           <button
             key={id}
             type="button"
             className={`${ui.button} ${ui.scenario} ${id === active ? '' : ui.ghost}`}
-            disabled={busy !== null || !token}
+            disabled={busy !== null || id === active}
             onClick={() => void choose(id)}
           >
             <span>{SCENARIO_LABEL[id]}</span>
-            <span className="mono">{busy === id ? '…' : id === active ? 'active' : 'inject'}</span>
+            <span className="mono">{busy === id ? '…' : id === active ? 'active' : id === 'live' ? 'return' : 'stress test'}</span>
           </button>
         ))}
       </div>
+      {revertsAt && active !== 'live' && (
+        <p className={ui.notice} role="status">
+          Back to live market inputs at {new Date(revertsAt).toLocaleTimeString()}.
+        </p>
+      )}
       {error && <p className={ui.error}>{error}</p>}
+      <details style={{ marginTop: 'var(--space-3)' }}>
+        <summary className="eyebrow">Presenter</summary>
+        <div className={ui.inputRow} style={{ marginTop: 'var(--space-2)' }}>
+          <input
+            id="demo-token"
+            type="password"
+            aria-label="Presenter token (optional, skips the cooldown)"
+            value={token}
+            onChange={(e) => setToken(e.target.value)}
+            placeholder="optional token"
+          />
+        </div>
+      </details>
     </section>
   );
 }

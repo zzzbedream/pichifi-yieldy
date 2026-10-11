@@ -39,6 +39,15 @@ export const configSchema = z.object({
   QUICKNODE_WEBHOOK_SECRET: optional(z.string().min(8)),
   CORS_ORIGIN: z.string().default('http://localhost:3000'),
   MARKET_MODE: z.enum(['live', 'scenario']).default('scenario'),
+  /** Lets anyone (e.g. judges) run stress scenarios without the presenter token. Needs MARKET_MODE=live. */
+  PUBLIC_STRESS_TEST: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((v) => v === 'true'),
+  STRESS_COOLDOWN_SECONDS: z.coerce.number().int().min(30).default(120),
+  STRESS_REVERT_SECONDS: z.coerce.number().int().min(60).default(180),
+  /** Public stress tests pause below this relayer balance (wei). Default 0.0003 ETH. */
+  RELAYER_MIN_BALANCE_WEI: z.coerce.bigint().default(300_000_000_000_000n),
   MARKET_SYMBOL: z.string().regex(/^[A-Z.]{1,10}$/).default('NVDA'),
   FINNHUB_API_KEY: optional(z.string().min(10)),
   LIVE_REFRESH_SECONDS: z.coerce.number().int().min(60).default(600),

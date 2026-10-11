@@ -78,14 +78,21 @@ async function getJson<T>(path: string): Promise<T> {
 export const fetchAgentState = () => getJson<AgentState>('/state');
 export const fetchDecisions = () => getJson<{ decisions: DecisionRecord[] }>('/decisions');
 
-export async function postScenario(scenario: ScenarioId, token: string): Promise<void> {
+/**
+ * Switches the agent's market scenario. Without a token this is a public stress test (global
+ * cooldown, automatic return to live inputs); the presenter token bypasses the cooldown.
+ * Returns when the vault will go back to live market inputs, if it will.
+ */
+export async function postScenario(scenario: ScenarioId, token?: string): Promise<{ revertsAt: string | null }> {
   const res = await fetch(`${appConfig.agentApiUrl}/scenario`, {
     method: 'POST',
-    headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
+    headers: { 'content-type': 'application/json', ...(token ? { authorization: `Bearer ${token}` } : {}) },
     body: JSON.stringify({ scenario }),
   });
-  if (res.status === 401) throw new Error('Demo token rejected');
-  if (!res.ok) throw new Error(`Scenario switch failed (${res.status})`);
+  const body = (await res.json().catch(() => ({}))) as { error?: unknown; revertsAt?: unknown };
+  if (res.status === 401) throw new Error('Stress tests need the presenter token on this deployment.');
+  if (!res.ok) throw new Error(typeof body.error === 'string' ? body.error : `Scenario switch failed (${res.status})`);
+  return { revertsAt: typeof body.revertsAt === 'string' ? body.revertsAt : null };
 }
 
 /** Pure reducer: newest first, records replaced by id (no in-place mutation). */

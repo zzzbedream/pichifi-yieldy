@@ -4,7 +4,8 @@
  *   GET  /state             signer identity, scenario, latest decision
  *   GET  /decisions         decision log (newest first)
  *   GET  /stream            Server-Sent Events: `decision` on every change
- *   POST /scenario          demo control (Bearer DEMO_API_TOKEN): switch market scenario
+ *   POST /scenario          switch market scenario: presenter (Bearer DEMO_API_TOKEN), or public
+ *                           stress test when enabled (global cooldown, auto-return to live inputs)
  *   POST /webhooks/quicknode  Quicknode Streams/Webhooks (HMAC-SHA256) -> trigger the agent
  */
 import Fastify, { type FastifyInstance } from 'fastify';
@@ -15,6 +16,7 @@ import { SCENARIO_IDS, SCENARIOS, isScenarioId, type MarketInputs, type Scenario
 import type { DecisionRecord, DecisionStore } from '../store/decisions.js';
 import type { Trigger } from '../engine/engine.js';
 import { registerRpcProxy } from './rpcProxy.js';
+import type { PublicStress } from './stressGate.js';
 
 export interface ApiEngine {
   currentScenario(): ScenarioId;
@@ -35,6 +37,8 @@ export interface ApiDeps {
   chainId: number;
   /** When set (hosted fork demo), exposes a method-filtered JSON-RPC proxy at POST /rpc. */
   rpcUpstream?: string;
+  /** When set, scenario switches are open to everyone (cooldown, auto-revert, gas floor). */
+  publicStress?: PublicStress;
 }
 
 const scenarioBody = z.object({ scenario: z.string().refine(isScenarioId, 'unknown scenario') });
@@ -109,13 +113,46 @@ export async function buildServer(deps: ApiDeps): Promise<FastifyInstance> {
     request.raw.on('close', cleanup);
   });
 
+  let revertTimer: NodeJS.Timeout | null = null;
+  app.addHook('onClose', async () => {
+    if (revertTimer) clearTimeout(revertTimer);
+  });
+
   app.post('/scenario', async (request, reply) => {
     const auth = request.headers.authorization ?? '';
-    if (!safeEqual(auth, `Bearer ${deps.demoToken}`)) return reply.code(401).send({ error: 'unauthorized' });
+    const isPresenter = safeEqual(auth, `Bearer ${deps.demoToken}`);
+    const pub = deps.publicStress;
+    if (!isPresenter && !pub) return reply.code(401).send({ error: 'unauthorized' });
     const parsed = scenarioBody.safeParse((request.body as { json?: unknown } | undefined)?.json);
-    if (!parsed.success) return reply.code(400).send({ error: 'scenario must be one of ' + SCENARIO_IDS.join(', ') });
-    deps.engine.setScenario(parsed.data.scenario as ScenarioId);
-    return { scenario: parsed.data.scenario };
+    if (!parsed.success) return reply.code(400).send({ error: 'scenario must be one of live, ' + SCENARIO_IDS.join(', ') });
+    const scenario = parsed.data.scenario as ScenarioId;
+
+    if (!isPresenter && pub) {
+      if (!(await pub.canSpend())) {
+        return reply.code(503).send({ error: 'Public stress tests are paused: the relayer is low on test gas.' });
+      }
+      const gate = pub.gate.check(Date.now());
+      if (!gate.ok) {
+        reply.header('retry-after', String(gate.retryAfterSeconds));
+        return reply
+          .code(429)
+          .send({ error: `Someone just ran a stress test. Try again in ${gate.retryAfterSeconds}s.`, retryAfter: gate.retryAfterSeconds });
+      }
+      pub.gate.record(Date.now());
+    }
+
+    deps.engine.setScenario(scenario);
+    if (revertTimer) clearTimeout(revertTimer);
+    revertTimer = null;
+    let revertsAt: string | null = null;
+    if (pub && scenario !== pub.revertTo) {
+      revertsAt = new Date(Date.now() + pub.revertMs).toISOString();
+      revertTimer = setTimeout(() => {
+        revertTimer = null;
+        if (deps.engine.currentScenario() === scenario) deps.engine.setScenario(pub.revertTo);
+      }, pub.revertMs);
+    }
+    return { scenario, revertsAt };
   });
 
   app.post('/webhooks/quicknode', async (request, reply) => {
