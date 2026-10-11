@@ -43,3 +43,6 @@ Thumbs.db
 
 # Local fork deployments
 deployments/local-*.json
+
+# visual (Stitch design system, kept local)
+.stitch/
