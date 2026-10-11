@@ -51,7 +51,7 @@ export function TryIt() {
       <li className={l.step}>
         <span className={l.stepN}>STEP 2</span>
         <h3>Get test ETH for gas</h3>
-        <p>Free from the official Robinhood Chain faucet.</p>
+        <p>Free from the official faucet, or press “Get test gas” in the app if your wallet is empty.</p>
         <a className={l.ctaGhost} style={{ marginTop: 'var(--space-3)' }} href={FAUCET_URL} target="_blank" rel="noopener noreferrer">
           Open faucet ↗
         </a>

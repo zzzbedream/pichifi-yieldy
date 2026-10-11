@@ -12,6 +12,9 @@ import { watchVaultFlows } from './indexer/depositWatcher.js';
 import { startLiveFeed, type LiveFeed } from './market/live.js';
 import { StressGate, type PublicStress } from './api/stressGate.js';
 import { privateKeyToAccount } from 'viem/accounts';
+import { createWalletClient, http } from 'viem';
+import { DripPolicy, type DripDeps } from './api/drip.js';
+import { robinhoodChain } from './chain/vaultClient.js';
 
 // Repo-root .env; variables already set in the process environment take precedence.
 loadEnv({ path: resolve(import.meta.dirname, '../../.env'), quiet: true });
@@ -68,6 +71,31 @@ async function main(): Promise<void> {
         }
       : undefined;
 
+  let drip: DripDeps | undefined;
+  if (config.DRIP_PRIVATE_KEY) {
+    const dripWallet = createWalletClient({
+      chain: robinhoodChain(config),
+      transport: http(config.RPC_URL),
+      account: privateKeyToAccount(config.DRIP_PRIVATE_KEY),
+    });
+    drip = {
+      policy: new DripPolicy({
+        amountWei: config.DRIP_AMOUNT_WEI,
+        budgetWei: config.DRIP_BUDGET_WEI,
+        minIntervalMs: config.DRIP_MIN_INTERVAL_SECONDS * 1000,
+      }),
+      amountWei: config.DRIP_AMOUNT_WEI,
+      getBalance: (address) => vault.publicClient.getBalance({ address }),
+      send: async (to, value) => {
+        const hash = await dripWallet.sendTransaction({ to, value });
+        await vault.publicClient.waitForTransactionReceipt({ hash });
+        return hash;
+      },
+      explorerUrl: config.EXPLORER_URL,
+    };
+    logger.info({ drip: dripWallet.account.address }, 'test-gas drip enabled');
+  }
+
   const server = await buildServer({
     engine,
     store,
@@ -79,6 +107,7 @@ async function main(): Promise<void> {
     chainId: config.CHAIN_ID,
     rpcUpstream: config.FORK_RPC_PROXY_UPSTREAM,
     publicStress,
+    drip,
   });
   await server.listen({ port: config.AGENT_PORT, host: '0.0.0.0' });
 

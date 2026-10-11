@@ -7,6 +7,7 @@ import { appConfig } from '@/lib/config';
 import { erc20Abi, vaultAbi } from '@/lib/abis';
 import { formatAmount, formatUsd, parseUnitsSafe, SHARE_DECIMALS, USDG_DECIMALS } from '@/lib/format';
 import { useWalletData } from '@/hooks/useVaultData';
+import { GasDrip } from './GasDrip';
 import ui from './ui.module.css';
 
 type Mode = 'deposit' | 'redeem';
@@ -133,6 +134,7 @@ export function PositionPanel({ sharePrice }: { sharePrice?: bigint }) {
         )}
       </div>
 
+      <GasDrip />
       {!isConnected && <p className={ui.notice}>Connect MetaMask or Rabby on Robinhood Chain testnet to deposit.</p>}
       {isTooMuch && <p className={ui.error}>Amount exceeds your balance.</p>}
       {amount !== '' && parsed === null && <p className={ui.error}>Enter a valid amount.</p>}

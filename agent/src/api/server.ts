@@ -17,6 +17,7 @@ import type { DecisionRecord, DecisionStore } from '../store/decisions.js';
 import type { Trigger } from '../engine/engine.js';
 import { registerRpcProxy } from './rpcProxy.js';
 import type { PublicStress } from './stressGate.js';
+import { registerDrip, type DripDeps } from './drip.js';
 
 export interface ApiEngine {
   currentScenario(): ScenarioId;
@@ -39,6 +40,8 @@ export interface ApiDeps {
   rpcUpstream?: string;
   /** When set, scenario switches are open to everyone (cooldown, auto-revert, gas floor). */
   publicStress?: PublicStress;
+  /** When set, exposes POST /drip (test gas for judges). */
+  drip?: DripDeps;
 }
 
 const scenarioBody = z.object({ scenario: z.string().refine(isScenarioId, 'unknown scenario') });
@@ -72,6 +75,7 @@ export async function buildServer(deps: ApiDeps): Promise<FastifyInstance> {
   app.get('/health', async () => ({ ok: true }));
 
   if (deps.rpcUpstream) registerRpcProxy(app, deps.rpcUpstream);
+  if (deps.drip) registerDrip(app, deps.drip);
 
   app.get('/state', async () => ({
     signer: deps.signer,
