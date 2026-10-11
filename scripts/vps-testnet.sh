@@ -23,7 +23,7 @@ echo "==> agent for vault $VAULT on $RPC (Amadeus anchor: $ANCHOR_ENABLED on $AN
 
 wait_http() { for _ in $(seq 1 60); do curl -s -m 2 "$1" >/dev/null 2>&1 && return 0; sleep 1; done; return 1; }
 pm2 ping >/dev/null 2>&1 || { echo "pm2 daemon not responding: check it manually (never pm2 kill: the VPS is shared)"; exit 1; }
-pm2 delete ayv-anvil ayv-agent >/dev/null 2>&1 || true
+for p in ayv-anvil ayv-agent; do pm2 delete "$p" >/dev/null 2>&1 || true; done  # one by one: a missing name aborts the whole call
 
 CORS="http://localhost:3000${VERCEL_URL:+,$VERCEL_URL}"
 (cd "$ROOT/agent" && RPC_URL="$RPC" VAULT_ADDRESS="$VAULT" SIGNER_SCHEME=bls \
