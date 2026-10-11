@@ -1,6 +1,7 @@
 'use client';
 
 import { useConnect, useConnection, useConnectors, useDisconnect, useSwitchChain } from 'wagmi';
+import Link from 'next/link';
 import { appConfig, robinhoodTestnet } from '@/lib/config';
 import { shortHex } from '@/lib/format';
 import ui from './ui.module.css';
@@ -11,10 +12,10 @@ export function Header({ isStreaming }: HeaderProps) {
   const buildLabel = appConfig.build === 'stylus' ? 'Rust · Stylus build' : 'Solidity build · Stylus activation paused';
   return (
     <header className={ui.header}>
-      <div className={ui.wordmark}>
-        <strong>Agentic Yield Vault</strong>
-        <span className="eyebrow">USDG · Robinhood Chain</span>
-      </div>
+      <Link href="/" className={ui.wordmark} style={{ textDecoration: 'none' }} title="Back to the PICHIFI homepage">
+        <strong>PICHIFI</strong>
+        <span className="eyebrow">Agentic Yield Vault · USDG · Robinhood Chain</span>
+      </Link>
       <div className={ui.headerMeta}>
         <span className={ui.pill} title="Agent decision stream">
           <span className={`${ui.dot} ${isStreaming ? ui.dotLive : ui.dotOff}`} aria-hidden />

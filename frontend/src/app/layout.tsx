@@ -7,7 +7,7 @@ const sans = IBM_Plex_Sans({ subsets: ['latin'], weight: ['400', '500', '600'], 
 const mono = IBM_Plex_Mono({ subsets: ['latin'], weight: ['400', '500'], variable: '--font-mono', display: 'swap' });
 
 export const metadata: Metadata = {
-  title: 'Agentic Yield Vault — USDG on Robinhood Chain',
+  title: 'PICHIFI — AI-managed USDG vault on Robinhood Chain',
   description:
     'An AI-managed USDG vault on Robinhood Chain: Uniswap v4 liquidity with a dynamic-fee hook, Morpho Blue as safe harbour, every move signed by an Amadeus agent and verified on-chain.',
 };

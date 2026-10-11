@@ -527,3 +527,38 @@
     border-top: 1px solid var(--rule);
   }
 }
+
+/* in-page section navigation (app) */
+.sectionNav {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  gap: var(--space-6);
+  overflow-x: auto;
+  padding: var(--space-3) 0;
+  margin-bottom: var(--space-6);
+  background: color-mix(in oklch, var(--paper) 92%, transparent);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--rule);
+  scrollbar-width: none;
+}
+
+.sectionNav a {
+  flex: none;
+  font-family: var(--font-mono-stack);
+  font-size: var(--text-xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--ink-soft);
+  transition: color var(--duration-fast);
+}
+
+.sectionNav a:hover {
+  color: var(--ink);
+}
+
+.anchor {
+  scroll-margin-top: 56px;
+}

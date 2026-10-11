@@ -12,6 +12,7 @@ import { PositionPanel } from './PositionPanel';
 import { DemoControls } from './DemoControls';
 import { Footer } from './Footer';
 import { PichiPanel } from './PichiPanel';
+import { SectionNav } from './SectionNav';
 import ui from './ui.module.css';
 
 export function Dashboard() {
@@ -30,6 +31,8 @@ export function Dashboard() {
           Contract addresses are not configured. Run <code>node scripts/sync-frontend-env.mjs</code> after deploying.
         </p>
       )}
+      <SectionNav />
+      <div id="overview" className={ui.anchor}>
       <NavHero
         totalAssets={vault.totalAssets}
         sharePrice={vault.sharePrice}
@@ -39,21 +42,26 @@ export function Dashboard() {
         paused={vault.paused}
         latest={latest}
       />
+      </div>
+      <div id="allocation" className={ui.anchor}>
       <AllocationBar
         allocation={vault.allocation}
         targetMorphoBps={hasRebalanced ? agentState[1] : undefined}
         targetUniswapBps={hasRebalanced ? agentState[2] : undefined}
         feePips={vault.feePips}
       />
+      </div>
       <div className={ui.main}>
+        <div id="decisions" className={ui.anchor}>
         <DecisionFeed decisions={agent.decisions} isAgentReachable={!agent.error} />
+        </div>
         <div className={ui.side}>
-          <PositionPanel sharePrice={vault.sharePrice} />
-          <PichiPanel />
-          {appConfig.demoMode && <DemoControls state={agent.state} onChanged={() => void agent.refetchState()} />}
+          <div id="position" className={ui.anchor}><PositionPanel sharePrice={vault.sharePrice} /></div>
+          <div id="pichi" className={ui.anchor}><PichiPanel /></div>
+          <div id="market" className={ui.anchor}>{appConfig.demoMode && <DemoControls state={agent.state} onChanged={() => void agent.refetchState()} />}</div>
         </div>
       </div>
-      <Footer agentIdentity={agent.state?.signer.identity} />
+      <div id="contracts" className={ui.anchor}><Footer agentIdentity={agent.state?.signer.identity} /></div>
     </div>
   );
 }
