@@ -175,4 +175,16 @@ The BLS pipeline (hash-to-field off-chain, then `MAP_FP2_TO_G2` ×2 → `G2ADD` 
 
 ## License
 
-MIT OR Apache-2.0 (Rust crates), MIT (Solidity and TypeScript).
+Our code is open source under the MIT license ([LICENSE](LICENSE)); the Rust crates are additionally available under Apache-2.0.
+
+### Third-party code
+
+| Dependency | License | How we use it |
+|---|---|---|
+| [Uniswap v4-core](https://github.com/Uniswap/v4-core) | BUSL-1.1 (core), MIT (interfaces/libraries) | Robinhood's deployed PoolManager; libraries and test routers for the hook and adapter |
+| [Uniswap v4-periphery](https://github.com/Uniswap/v4-periphery) | MIT | Hook base and helpers |
+| [Morpho Blue](https://github.com/morpho-org/morpho-blue) | BUSL-1.1 | Canonical bytecode self-deployed on **testnet only** (non-production use); mainnet would use Morpho's official deployment |
+| [OpenZeppelin Contracts](https://github.com/OpenZeppelin/openzeppelin-contracts) | MIT | Token and utility contracts |
+| [@amadeus-protocol/sdk](https://www.npmjs.com/package/@amadeus-protocol/sdk), viem, Next.js, wagmi | MIT / see packages | Agent signing and anchoring, chain access, dashboard |
+
+Market data: Yahoo Finance (daily closes), Finnhub (earnings calendar), FRED (recession probability), used for testnet demo inputs only.
