@@ -1,35 +1,57 @@
-/* Agentic Yield Vault — "editorial financial terminal".
-   Paper-and-ink surfaces, monospaced figures, one signal colour per regime. */
+/* PICHIFI — Enchanted Cyber-Jungle & Gold Vault Design System
+   Synthesized from guardian Kingfisher, Morpho butterfly, mystical Unicorn, and USDG Gold Shield. */
 
 :root {
-  --paper: oklch(95.5% 0.012 85);
-  --paper-raised: oklch(98% 0.008 85);
-  --paper-sunk: oklch(92% 0.014 85);
-  --ink: oklch(19% 0.01 260);
-  --ink-soft: oklch(42% 0.012 260);
-  --ink-faint: oklch(62% 0.01 260);
-  --rule: oklch(83% 0.012 85);
-  --rule-strong: oklch(24% 0.01 260);
+  /* Surfaces & Backgrounds - Enchanted Rainforest Obsidian */
+  --paper: #05140d;
+  --paper-raised: #0a2419;
+  --paper-sunk: #061b12;
+  --canvas-forest: #05140d;
+  --surface-canopy: #0a2419;
+  --surface-well: #061b12;
 
-  --regime-on: oklch(58% 0.15 152);
-  --regime-volatile: oklch(70% 0.16 70);
-  --regime-off: oklch(50% 0.16 268);
-  --leg-morpho: oklch(50% 0.16 268);
-  --leg-uniswap: oklch(64% 0.19 350);
-  --leg-idle: oklch(76% 0.01 85);
-  --ok: oklch(55% 0.14 152);
-  --warn: oklch(64% 0.17 60);
-  --bad: oklch(56% 0.2 25);
+  /* Typography - Starlight Ivory & Leaf Sage */
+  --ink: #f1f5f0;
+  --ink-soft: #8bae9b;
+  --ink-faint: #4e725f;
 
-  --font-sans-stack: var(--font-sans), 'IBM Plex Sans', system-ui, sans-serif;
-  --font-mono-stack: var(--font-mono), 'IBM Plex Mono', ui-monospace, monospace;
+  /* Dividers & Borders */
+  --rule: #184732;
+  --rule-strong: #256b4b;
+  --rule-gold: #c69224;
+
+  /* Brand Accents from Logo */
+  --vault-gold: #e5a93c;
+  --vault-gold-light: #f59e0b;
+  --vault-gold-dark: #b47818;
+  --morpho-cyan: #00e5ff;
+  --morpho-blue: #2563eb;
+  --mystic-orchid: #a855f7;
+  --bio-emerald: #10b981;
+  --glow-emerald: rgba(16, 185, 129, 0.35);
+  --glow-cyan: rgba(0, 229, 255, 0.35);
+  --glow-gold: rgba(245, 158, 11, 0.35);
+
+  /* Yield Regimes & Protocol Legs */
+  --regime-on: #10b981;
+  --regime-volatile: #f59e0b;
+  --regime-off: #38bdf8;
+  --leg-morpho: #00e5ff;
+  --leg-uniswap: #a855f7;
+  --leg-idle: #2e5441;
+  --ok: #10b981;
+  --warn: #f59e0b;
+  --bad: #ef4444;
+
+  --font-sans-stack: var(--font-sans), 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+  --font-mono-stack: var(--font-mono), 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
 
   --text-xs: 0.72rem;
   --text-sm: 0.84rem;
   --text-base: 0.95rem;
   --text-lg: 1.15rem;
   --text-xl: clamp(1.4rem, 1.1rem + 1vw, 1.9rem);
-  --text-hero: clamp(2.6rem, 1.6rem + 4.2vw, 5.2rem);
+  --text-hero: clamp(2.5rem, 1.5rem + 3.8vw, 4.6rem);
 
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -40,28 +62,18 @@
   --space-12: 3rem;
   --gutter: clamp(1rem, 0.6rem + 2vw, 2.5rem);
 
-  --radius: 2px;
-  --shadow-raised: 0 1px 0 var(--rule), 0 18px 40px -28px oklch(20% 0.02 260 / 0.35);
+  --radius: 8px;
+  --radius-lg: 14px;
+  --radius-full: 9999px;
+
+  --shadow-raised: 0 4px 24px -2px rgba(0, 0, 0, 0.6), 0 0 1px var(--rule);
+  --shadow-gold: 0 0 25px rgba(229, 169, 60, 0.25);
+  --shadow-cyan: 0 0 25px rgba(0, 229, 255, 0.25);
+  --shadow-emerald: 0 0 25px rgba(16, 185, 129, 0.25);
+
   --duration-fast: 160ms;
   --duration-slow: 700ms;
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --paper: oklch(16% 0.008 260);
-    --paper-raised: oklch(20% 0.01 260);
-    --paper-sunk: oklch(13% 0.008 260);
-    --ink: oklch(93% 0.01 85);
-    --ink-soft: oklch(74% 0.01 85);
-    --ink-faint: oklch(56% 0.01 85);
-    --rule: oklch(30% 0.01 260);
-    --rule-strong: oklch(88% 0.01 85);
-    --leg-idle: oklch(40% 0.01 260);
-    --regime-off: oklch(66% 0.15 268);
-    --leg-morpho: oklch(66% 0.15 268);
-    --shadow-raised: 0 1px 0 var(--rule), 0 18px 40px -28px oklch(0% 0 0 / 0.7);
-  }
 }
 
 * {
@@ -72,6 +84,7 @@ html,
 body {
   margin: 0;
   padding: 0;
+  background-color: var(--paper);
 }
 
 body {
@@ -81,8 +94,12 @@ body {
   font-size: var(--text-base);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
-  /* faint ledger grain */
-  background-image: repeating-linear-gradient(0deg, transparent 0 27px, color-mix(in oklch, var(--rule) 35%, transparent) 27px 28px);
+  position: relative;
+  overflow-x: hidden;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(16, 185, 129, 0.15), transparent),
+    radial-gradient(ellipse 60% 40% at 90% 20%, rgba(0, 229, 255, 0.08), transparent),
+    radial-gradient(ellipse 50% 30% at 10% 60%, rgba(168, 85, 247, 0.08), transparent);
 }
 
 a {
@@ -92,7 +109,7 @@ a {
 }
 
 a:hover {
-  text-decoration-color: var(--ink);
+  text-decoration-color: var(--vault-gold);
 }
 
 button {
@@ -105,7 +122,7 @@ button:disabled {
 }
 
 :focus-visible {
-  outline: 2px solid var(--ink);
+  outline: 2px solid var(--morpho-cyan);
   outline-offset: 2px;
 }
 
